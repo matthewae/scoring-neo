@@ -18,8 +18,9 @@ return new class extends Migration
             $table->boolean('is_complete')->default(false);
             $table->text('notes')->nullable();
             $table->string('file_path')->nullable();
-            $table->boolean('guest_uploaded')->default(false);
-            $table->boolean('approved_by_user')->default(false);
+            $table->text('guest_notes')->nullable();
+            $table->string('guest_uploaded_file_path')->nullable();
+            $table->boolean('guest_approval_status')->nullable(); // null: pending, true: approved, false: rejected
             $table->timestamps();
         });
     }

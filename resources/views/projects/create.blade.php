@@ -24,7 +24,8 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             background-color: #b2f0d0; /* Solid light green background */
-            image.png            display: flex;
+            image.png       
+            display: flex;
             /* Removed justify-content and align-items to allow sidebar positioning */
             min-height: 100vh;
             color: var(--text-color);
@@ -36,17 +37,19 @@
         }
 
         #sidebar {
-            min-width: 250px;
-            max-width: 250px;
-            background: linear-gradient(to bottom, #28a745, #218838); /* Darker green gradient for sidebar */
+            min-width: 300px; /* Increased from 250px */
+            max-width: 300px; /* Increased from 250px */
+            background: #34495e;
             color: #fff;
             transition: all 0.3s;
-            padding: 20px;
-            box-shadow: 3px 0 10px rgba(0,0,0,0.2);
+            padding: 20px; /* Re-added padding */
+            box-shadow: 3px 0 10px rgba(0,0,0,0.2); /* Re-added box-shadow */
         }
 
         #sidebar.active {
-            margin-left: -250px;
+            min-width: 80px;
+            max-width: 80px;
+            text-align: center;
         }
 
         #sidebar .sidebar-header {
@@ -67,24 +70,27 @@
         }
 
         #sidebar ul li a {
-            padding: 10px;
+            padding: 15px 10px;
             font-size: 1.1em;
             display: block;
             color: #fff;
             text-decoration: none;
-            border-radius: 5px;
-            margin-bottom: 5px;
-            transition: all 0.3s;
+            white-space: nowrap; /* Prevent text wrapping */
+            overflow: hidden; /* Hide overflowing text */
+            text-overflow: ellipsis; /* Add ellipsis for truncated text */
+            border-radius: 5px; /* Re-added border-radius */
+            margin-bottom: 5px; /* Re-added margin-bottom */
+            transition: all 0.3s; /* Re-added transition */
         }
 
         #sidebar ul li a:hover {
-            background: rgba(255,255,255,0.2);
-            transform: translateX(5px);
+            background: rgba(255,255,255,0.2); /* Re-added hover effect */
+            transform: translateX(5px); /* Re-added transform on hover */
         }
 
         #sidebar ul li.active > a, a[aria-expanded="true"] {
             color: #fff;
-            background: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.3); /* Re-added active state background */
         }
 
         #content {
@@ -92,6 +98,12 @@
             padding: 20px;
             min-height: 100vh;
             transition: all 0.3s;
+            margin-left: 300px; /* Adjusted to match new sidebar width */
+        }
+
+        #content.active {
+            margin-left: 80px;
+            width: calc(100% - 80px); /* Adjust content width when sidebar is collapsed */
         }
 
         .container {
@@ -259,14 +271,50 @@
             font-size: 1rem;
             color: #555;
         }
+
+        .sidebar-toggle-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            /* Ensure button is above sidebar when sidebar is collapsed */
+        }
+
+        #sidebar.active + #content .sidebar-toggle-btn {
+            left: 90px; /* Adjust based on collapsed sidebar width + some margin */
+        }
+
+        #sidebar.active .sidebar-header h3 {
+            display: none;
+        }
+
+        #sidebar.active .list-unstyled.components li a span {
+            display: none;
+        }
+
+        #sidebar.active .list-unstyled.components li a i {
+            margin-right: 0;
+        }
+
+        .container {
+            max-width: 1200px; /* Increased max-width for a wider form */
+        }
+
+        .card {
+            padding: 40px; /* Increased padding for a wider card */
+        }
     </style>
 </head>
 <body>
+    <button type="button" id="sidebarCollapse" class="btn btn-info mb-3 sidebar-toggle-btn">
+        <i class="fas fa-align-left"></i>
+        <span>Toggle Sidebar</span>
+    </button>
     <div class="wrapper">
         <!-- Sidebar -->
         <nav id="sidebar">
             <div class="sidebar-header">
-                <h3>Scoring App</h3>
+                <h3></h3>
             </div>
 
             <ul class="list-unstyled components">
@@ -321,6 +369,8 @@
                         <a href="{{ route('projects.index') }}" class="btn-back"><i class="fas fa-arrow-left"></i> Kembali</a>
                     </div>
 
+
+
                     <form action="{{ route('projects.store') }}" method="POST">
                         @csrf
                         <div class="mb-6 slide glass-effect rounded-xl p-6" id="slide-0">
@@ -339,6 +389,46 @@
                             <div class="form-group">
                                 <label for="end_date">Tanggal Selesai</label>
                                 <input type="date" class="form-control" id="end_date" name="end_date">
+                            </div>
+                            <div class="form-group">
+                                <label for="pekerjaan">Pekerjaan</label>
+                                <input type="text" class="form-control" id="pekerjaan" name="pekerjaan" placeholder="Masukkan Pekerjaan">
+                            </div>
+                            <div class="form-group">
+                                <label for="lokasi">Lokasi</label>
+                                <input type="text" class="form-control" id="lokasi" name="lokasi" placeholder="Masukkan Lokasi">
+                            </div>
+                            <div class="form-group">
+                                <label for="kementerian_lembaga_perangkat_daerah_institusi">Kementerian/Lembaga/Perangkat Daerah/Institusi*</label>
+                                <input type="text" class="form-control" id="kementerian_lembaga_perangkat_daerah_institusi" name="kementerian_lembaga_perangkat_daerah_institusi" placeholder="Masukkan Kementerian/Lembaga/Perangkat Daerah/Institusi">
+                            </div>
+                            <div class="form-group">
+                                <label for="konsultan_perencana">Konsultan Perencana</label>
+                                <input type="text" class="form-control" id="konsultan_perencana" name="konsultan_perencana" placeholder="Masukkan Konsultan Perencana">
+                            </div>
+                            <div class="form-group">
+                                <label for="konsultan_mk">Konsultan MK</label>
+                                <input type="text" class="form-control" id="konsultan_mk" name="konsultan_mk" placeholder="Masukkan Konsultan MK">
+                            </div>
+                            <div class="form-group">
+                                <label for="kontraktor_pelaksana">Kontraktor Pelaksana</label>
+                                <input type="text" class="form-control" id="kontraktor_pelaksana" name="kontraktor_pelaksana" placeholder="Masukkan Kontraktor Pelaksana">
+                            </div>
+                            <div class="form-group">
+                                <label for="metode_pemilihan">Metode Pemilihan</label>
+                                <input type="text" class="form-control" id="metode_pemilihan" name="metode_pemilihan" placeholder="Masukkan Metode Pemilihan">
+                            </div>
+                            <div class="form-group">
+                                <label for="nilai_kontrak">Nilai Kontrak</label>
+                                <input type="number" step="0.01" class="form-control" id="nilai_kontrak" name="nilai_kontrak" placeholder="Masukkan Nilai Kontrak">
+                            </div>
+                            <div class="form-group">
+                                <label for="tanggal_spmk">Tanggal SPMK</label>
+                                <input type="date" class="form-control" id="tanggal_spmk" name="tanggal_spmk">
+                            </div>
+                            <div class="form-group">
+                                <label for="jangka_waktu">Jangka Waktu</label>
+                                <input type="text" class="form-control" id="jangka_waktu" name="jangka_waktu" placeholder="Masukkan Jangka Waktu">
                             </div>
                         </div>
 
@@ -495,6 +585,18 @@
                     }
                 }
             };
+
+            // Sidebar toggle
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
+            const sidebarCollapse = document.getElementById('sidebarCollapse');
+
+            if (sidebarCollapse) {
+                sidebarCollapse.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    content.classList.toggle('active');
+                });
+            }
         });
     </script>
 </body>

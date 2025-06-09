@@ -313,7 +313,7 @@
                     <a href="#"><i class="fas fa-file-alt"></i> <span>Pengajuan Penilaian</span></a>
                 </li>
                 <li>
-                    <a href="#"><i class="fas fa-chart-bar"></i> <span>Hasil Penilaian</span></a>
+                    <a href="{{ route('projects.assessment_results.index') }}"><i class="fas fa-poll"></i> Hasil Penilaian</a>
                 </li>
             </ul>
             <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="logout-button"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>

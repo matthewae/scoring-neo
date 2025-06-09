@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\ProjectDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class GuestController extends Controller
 {
@@ -14,6 +15,11 @@ class GuestController extends Controller
         // This could be the guest dashboard, showing projects they can assess or their past submissions
         $projects = Project::all(); // Example: show all projects for guest to view scores
         return view('guest_dashboard', compact('projects'));
+    }
+
+    public function guide()
+    {
+        return view('guest.guide');
     }
 
     public function projectsIndex()
@@ -25,13 +31,37 @@ class GuestController extends Controller
     public function showProject(Project $project)
     {
         // Show project details and current scores for guests
-        return view('guest.project_details', compact('project'));
+        return view('guest.projects.show', compact('project'));
+    }
+
+    public function assess(Project $project)
+    {
+        return view('guest.projects.assess', compact('project'));
     }
 
     public function proposeAssessment(ProjectDocument $projectDocument)
     {
         // Form for guest to propose assessment and upload file
         return view('guest.propose_assessment', compact('projectDocument'));
+    }
+
+    public function saveAssessment(Request $request, Project $project)
+    {
+        $request->validate([
+            'documents.*.is_complete' => 'required|boolean',
+            'documents.*.notes' => 'nullable|string|max:1000',
+        ]);
+
+        DB::transaction(function () use ($request, $project) {
+            foreach ($request->input('documents') as $document_id => $data) {
+                $project->documents()->updateExistingPivot($document_id, [
+                    'is_complete' => $data['is_complete'],
+                    'notes' => $data['notes'],
+                ]);
+            }
+        });
+
+        return redirect()->route('guest.projects.show', $project->id)->with('success', 'Penilaian dokumen berhasil disimpan!');
     }
 
     public function saveProposedAssessment(Request $request, ProjectDocument $projectDocument)
@@ -53,6 +83,33 @@ class GuestController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Pengajuan penilaian berhasil dikirim, menunggu persetujuan!');
+    }
+
+    public function upload(Request $request, ProjectDocument $projectDocument)
+    {
+        return $this->saveProposedAssessment($request, $projectDocument);
+    }
+
+    public function submissionHistoryIndex()
+    {
+        // Logic to retrieve and display submission history for the guest
+        $guestProposals = ProjectDocument::whereNotNull('guest_uploaded_file_path')
+                                        ->orWhereNotNull('guest_notes')
+                                        ->with('project', 'document')
+                                        ->get();
+        return view('guest.submission_history.index', compact('guestProposals'));
+    }
+
+    public function assessmentResultsIndex()
+    {
+        // Logic to retrieve assessment results for guests
+        // This might involve fetching ProjectDocuments that have been assessed
+        // and are relevant to the guest user.
+        $projectDocuments = ProjectDocument::where('guest_approval_status', 'approved') // Assuming 'approved' means assessed and ready for viewing
+                                            ->with(['project', 'document'])
+                                            ->get();
+
+        return view('guest.assessment_results.index', compact('projectDocuments'));
     }
 
     public function guestApprovalsIndex()

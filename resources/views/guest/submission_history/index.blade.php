@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guest Dashboard</title>
+    <title>Riwayat Pengajuan</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -80,21 +80,35 @@
             margin-right: 10px;
             color: #3498db;
         }
-        .video-container {
-            position: relative;
-            width: 100%;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-            height: 0;
-            overflow: hidden;
-            border-radius: 8px;
+        .table thead th {
+            background-color: #e9ecef;
+            color: #495057;
+            font-weight: bold;
         }
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
+        .table tbody tr:hover {
+            background-color: #f2f2f2;
+        }
+        .status-badge {
+            padding: .35em .65em;
+            border-radius: .25rem;
+            font-size: 75%;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+        }
+        .status-pending {
+            color: #6c757d;
+            background-color: #e2e6ea;
+        }
+        .status-approved {
+            color: #28a745;
+            background-color: #d4edda;
+        }
+        .status-rejected {
+            color: #dc3545;
+            background-color: #f8d7da;
         }
         .btn-primary {
             background-color: #3498db;
@@ -103,38 +117,6 @@
         .btn-primary:hover {
             background-color: #2980b9;
             border-color: #2980b9;
-        }
-        .btn-info {
-            background-color: #1abc9c;
-            border-color: #1abc9c;
-        }
-        .btn-info:hover {
-            background-color: #16a085;
-            border-color: #16a085;
-        }
-        .btn-success {
-            background-color: #2ecc71;
-            border-color: #2ecc71;
-        }
-        .btn-success:hover {
-            background-color: #27ae60;
-            border-color: #27ae60;
-        }
-        .text-primary {
-            color: #3498db !important;
-        }
-        .text-info {
-            color: #1abc9c !important;
-        }
-        .text-success {
-            color: #2ecc71 !important;
-        }
-        .text-danger {
-            color: #e74c3c !important;
-        }
-        .icon-large {
-            font-size: 3rem;
-            margin-bottom: 15px;
         }
         @media (max-width: 768px) {
             #sidebar-wrapper {
@@ -155,10 +137,10 @@
         <div id="sidebar-wrapper">
             <div class="sidebar-heading">Scoring System</div>
             <div class="list-group list-group-flush">
-                <a href="#" class="list-group-item list-group-item-action active"><i class="bi bi-house-door-fill me-2"></i>Dashboard</a>
+                <a href="{{ route('guest.dashboard') }}" class="list-group-item list-group-item-action"><i class="bi bi-house-door-fill me-2"></i>Dashboard</a>
                 <a href="{{ route('guest.projects.index') }}" class="list-group-item list-group-item-action"><i class="bi bi-file-earmark-arrow-up-fill me-2"></i>Pengajuan Dokumen</a>
-                <a href="{{ route('guest.assessment_results.index') }}" class="list-group-item list-group-item-action"><i class="bi bi-star-fill me-2"></i>Lihat Penilaian</a>
-                <a href="{{ route('guest.submission_history.index') }}" class="list-group-item list-group-item-action"><i class="bi bi-clock-history me-2"></i>Riwayat Pengajuan</a>
+                <a href="#" class="list-group-item list-group-item-action"><i class="bi bi-star-fill me-2"></i>Lihat Penilaian</a>
+                <a href="{{ route('guest.submission_history.index') }}" class="list-group-item list-group-item-action active"><i class="bi bi-clock-history me-2"></i>Riwayat Pengajuan</a>
                 <a href="{{ route('guest.guide') }}" class="list-group-item list-group-item-action"><i class="bi bi-book-fill me-2"></i>Panduan</a>
                 <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="list-group-item list-group-item-action text-danger"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
             </div>
@@ -181,62 +163,65 @@
             </form>
 
             <div class="container-fluid py-4">
-                @if (session('status'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('status') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <h2 class="mb-4">Riwayat Pengajuan Dokumen</h2>
+
+                @if ($guestProposals->isEmpty())
+                    <div class="alert alert-info" role="alert">
+                        Belum ada riwayat pengajuan dokumen.
+                    </div>
+                @else
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">
+                            <i class="bi bi-table me-2"></i>Daftar Pengajuan
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Nama Proyek</th>
+                                            <th>Nama Dokumen</th>
+                                            <th>Catatan Tamu</th>
+                                            <th>File Diunggah</th>
+                                            <th>Status Persetujuan</th>
+                                            <th>Tanggal Pengajuan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($guestProposals as $index => $proposal)
+                                            <tr>
+                                                <td>{{ $index + 1 }}</td>
+                                                <td>{{ $proposal->project->name }}</td>
+                                                <td>{{ $proposal->document->name }}</td>
+                                                <td>{{ $proposal->guest_notes ?? '-' }}</td>
+                                                <td>
+                                                    @if ($proposal->guest_uploaded_file_path)
+                                                        <a href="{{ Storage::url($proposal->guest_uploaded_file_path) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                            Lihat File
+                                                        </a>
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if ($proposal->guest_approval_status === null)
+                                                        <span class="status-badge status-pending">Menunggu</span>
+                                                    @elseif ($proposal->guest_approval_status === 1)
+                                                        <span class="status-badge status-approved">Disetujui</span>
+                                                    @else
+                                                        <span class="status-badge status-rejected">Ditolak</span>
+                                                    @endif
+                                                </td>
+                                                <td>{{ $proposal->updated_at->format('d M Y H:i') }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 @endif
-
-                <div class="row">
-                    <div class="col-lg-8 mb-4">
-                        <div class="card shadow-sm">
-                            <div class="card-header">
-                                <i class="bi bi-play-circle-fill"></i>
-                                <h5 class="mb-0">Video Tutorial</h5>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="video-container">
-                                    <!-- Ganti URL video YouTube Anda di sini -->
-                                    <iframe src="https://www.youtube.com/embed/your_video_id" title="Video tutorial" allowfullscreen></iframe>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 mb-4">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
-                                <i class="bi bi-book-fill text-success icon-large"></i>
-                                <h5 class="card-title">Panduan Penggunaan</h5>
-                                <p class="card-text text-muted">Pelajari cara menggunakan sistem scoring dokumen konstruksi.</p>
-                                <a href="{{ route('guest.guide') }}" class="btn btn-success mt-auto">Baca Panduan</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-6 col-md-6 mb-4">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body text-center">
-                                <i class="bi bi-file-earmark-arrow-up-fill text-primary icon-large"></i>
-                                <h5 class="card-title">Pengajuan Dokumen</h5>
-                                <p class="card-text text-muted">Ajukan dokumen konstruksi Anda untuk dinilai oleh tim ahli kami.</p>
-                                <a href="{{ route('guest.projects.index') }}" class="btn btn-primary mt-3">Ajukan Sekarang</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 col-md-6 mb-4">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body text-center">
-                                <i class="bi bi-clock-history text-info icon-large"></i>
-                                <h5 class="card-title">Riwayat Pengajuan</h5>
-                                <p class="card-text text-muted">Pantau status dan riwayat pengajuan dokumen Anda.</p>
-                                <a href="#" class="btn btn-info mt-3">Lihat Riwayat</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
         <!-- /#page-content-wrapper -->

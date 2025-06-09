@@ -119,4 +119,20 @@ class ProjectController extends Controller
 
         return redirect()->route('projects.show', $project->id)->with('success', 'Penilaian dokumen berhasil disimpan!');
     }
+
+    public function assessmentResultsIndex()
+    {
+        $assessedProjects = Project::whereHas('documents', function ($query) {
+            $query->where('is_complete', true);
+        })->get();
+
+        return view('assessment_results.index', compact('assessedProjects'));
+    }
+
+    public function assessmentResultsShow(Project $project)
+    {
+        // You can load additional data here if needed, e.g., documents, graphs
+        $projectDocuments = $project->documents()->where('is_complete', true)->get();
+        return view('assessment_results.show', compact('project', 'projectDocuments'));
+    }
 }

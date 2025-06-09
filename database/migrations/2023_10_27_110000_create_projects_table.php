@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('project_name');
+            $table->text('project_description');
             $table->string('pekerjaan');
             $table->string('lokasi');
             $table->string('kementerian_lembaga_perangkat_daerah_institusi');

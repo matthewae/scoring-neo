@@ -22,6 +22,13 @@ Auth::routes();
 Route::get('/guest_dashboard', [App\Http\Controllers\GuestController::class, 'dashboard'])->name('guest.dashboard');
 Route::get('/user_dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->name('user.dashboard');
 
+Route::post('/logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/')->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+})->name('logout');
+
 Route::prefix('guest')->name('guest.')->group(function () {
     Route::get('/guide', [App\Http\Controllers\GuestController::class, 'guide'])->name('guide');
     Route::get('/projects', [App\Http\Controllers\GuestController::class, 'projectsIndex'])->name('projects.index');
@@ -39,7 +46,7 @@ Route::middleware(['auth'])->group(function () {
     // Project Routes
     Route::prefix('projects')->name('projects.')->group(function () {
         Route::get('/', [App\Http\Controllers\ProjectController::class, 'index'])->name('index');
-        Route::get('/create', [App\Http\Controllers\ProjectController::class, 'create'])->name('create');
+        Route::get('/create', [App\Http\Controllers\ProjectController::class, 'create'])->name('create')->middleware(['auth', 'role:user']);
         Route::post('/', [App\Http\Controllers\ProjectController::class, 'store'])->name('store');
         Route::get('/{project}', [App\Http\Controllers\ProjectController::class, 'show'])->name('show');
         Route::get('/{project}/edit', [App\Http\Controllers\ProjectController::class, 'edit'])->name('edit');

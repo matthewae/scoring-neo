@@ -16,6 +16,12 @@ class GuestController extends Controller
         return view('guest_dashboard', compact('projects'));
     }
 
+    public function projectsIndex()
+    {
+        $projects = Project::all();
+        return view('guest.projects.index', compact('projects'));
+    }
+
     public function showProject(Project $project)
     {
         // Show project details and current scores for guests

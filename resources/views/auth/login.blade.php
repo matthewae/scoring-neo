@@ -108,5 +108,14 @@
         </div>
     </div>
     <script src="/js/particles-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof particlesJS !== 'undefined') {
+                particlesJS.load('particles-js', '/js/particles-config.js', function() {
+                    console.log('particles.js loaded - callback');
+                });
+            }
+        });
+    </script>
 </body>
 </html>

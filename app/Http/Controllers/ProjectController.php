@@ -18,12 +18,15 @@ class ProjectController extends Controller
 
     public function create()
     {
-        return view('projects.create');
+        $documentStages = DocumentStage::with('documents')->get();
+        return view('projects.create', compact('documentStages'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
+            'project_name' => 'required|string|max:255',
+            'project_description' => 'required|string|max:1000',
             'pekerjaan' => 'required|string|max:255',
             'lokasi' => 'required|string|max:255',
             'kementerian_lembaga_perangkat_daerah_institusi' => 'required|string|max:255',
@@ -36,7 +39,7 @@ class ProjectController extends Controller
             'jangka_waktu' => 'required|integer',
         ]);
 
-        $project = Project::create($request->all());
+        $project = Project::create(array_merge($request->all(), ['user_id' => auth()->id()]));
 
         // Initialize project_documents pivot table with all 428 documents
         $documents = Document::all();
@@ -62,6 +65,8 @@ class ProjectController extends Controller
     public function update(Request $request, Project $project)
     {
         $request->validate([
+            'project_name' => 'required|string|max:255',
+            'project_description' => 'required|string|max:1000',
             'pekerjaan' => 'required|string|max:255',
             'lokasi' => 'required|string|max:255',
             'kementerian_lembaga_perangkat_daerah_institusi' => 'required|string|max:255',

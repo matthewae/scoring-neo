@@ -10,6 +10,9 @@ class Project extends Model
     use HasFactory;
 
     protected $fillable = [
+        'project_name',
+        'project_description',
+        'user_id',
         'pekerjaan',
         'lokasi',
         'kementerian_lembaga_perangkat_daerah_institusi',

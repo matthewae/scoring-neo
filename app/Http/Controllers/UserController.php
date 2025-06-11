@@ -39,10 +39,13 @@ class UserController extends Controller
         $request->validate([
             'project_id' => 'required|exists:projects,id',
             'document_name' => 'required|string|max:255',
-            'file' => 'required|mimes:pdf|max:10240', // Max 10MB
+            'file' => 'nullable|mimes:pdf|max:1048576', // Max 1GB (1024 * 1024 = 1048576 KB)
         ]);
 
-        $filePath = $request->file('file')->store('documents', 'public');
+        $filePath = null;
+        if ($request->hasFile('file')) {
+            $filePath = $request->file('file')->store('documents', 'public');
+        }
 
         Document::create([
             'project_id' => $request->project_id,
@@ -55,7 +58,33 @@ class UserController extends Controller
 
     public function assessmentSubmissionsIndex()
     {
-        $submissions = ProjectDocument::with(['project', 'document', 'guest'])->get();
+        $submissions = ProjectDocument::with(['project', 'document'])->get();
         return view('user.assessment_submissions.index', compact('submissions'));
+    }
+
+    public function approveSubmission(ProjectDocument $projectDocument)
+    {
+        $projectDocument->guest_approval_status = true;
+        $projectDocument->approved_by_user = auth()->id();
+        $projectDocument->save();
+
+        return redirect()->back()->with('success', 'Pengajuan berhasil disetujui!');
+    }
+
+    public function rejectSubmission(ProjectDocument $projectDocument)
+    {
+        $projectDocument->guest_approval_status = false;
+        $projectDocument->approved_by_user = auth()->id();
+        $projectDocument->save();
+
+        return redirect()->back()->with('success', 'Pengajuan berhasil ditolak!');
+    }
+
+    public function documentsIndex()
+    {
+        $projectDocuments = ProjectDocument::whereHas('project', function ($query) {
+            $query->where('user_id', auth()->id());
+        })->get();
+        return view('user.documents.index', compact('projectDocuments'));
     }
 }

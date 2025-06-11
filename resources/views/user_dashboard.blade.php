@@ -340,8 +340,8 @@
                         </div>
                         <div class="card-body">
                             <p>Upload dan kelola dokumen konstruksi Anda dengan mudah.</p>
-                            <a href="#" class="btn btn-custom-upload"><i class="fas fa-upload"></i> Upload Dokumen</a>
-                            <a href="#" class="btn btn-custom-list"><i class="fas fa-list"></i> Daftar Dokumen</a>
+                            <a href="{{ route('user.documents.upload') }}" class="btn btn-custom-upload"><i class="fas fa-upload"></i> Upload Dokumen</a>
+                            <a href="{{ route('user.documents.index') }}" class="btn btn-custom-list"><i class="fas fa-list"></i> Daftar Dokumen</a>
                         </div>
                     </div>
                 </div>

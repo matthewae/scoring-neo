@@ -322,7 +322,7 @@
                                 <th>Guest</th>
                                 <th>Project</th>
                                 <th>Dokumen</th>
-                                <th>File Diunggah Sendiri</th>
+
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -332,20 +332,14 @@
                                     <td>{{ $submission->guest->name ?? 'N/A' }}</td>
                                     <td>{{ $submission->project->name ?? 'N/A' }}</td>
                                     <td>{{ $submission->document->document_name ?? 'N/A' }}</td>
-                                    <td>
-                                        @if ($submission->uploaded_by_guest)
-                                            <span class="badge bg-success">Ya</span>
-                                        @else
-                                            <span class="badge bg-info">Tidak</span>
-                                        @endif
-                                    </td>
+
                                     <td>
                                         <a href="#" class="btn btn-sm btn-primary">Lihat Detail</a>
-                                        <form action="#" method="POST" style="display:inline-block;">
+                                        <form action="{{ route('user.assessment_submissions.approve', $submission->id) }}" method="POST" style="display:inline-block;">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-success">Setujui</button>
                                         </form>
-                                        <form action="#" method="POST" style="display:inline-block;">
+                                        <form action="{{ route('user.assessment_submissions.reject', $submission->id) }}" method="POST" style="display:inline-block;">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-danger">Tolak</button>
                                         </form>

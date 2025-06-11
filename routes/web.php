@@ -48,21 +48,25 @@ Route::prefix('guest')->name('guest.')->group(function () {
 });
 
 Route::middleware(['auth', 'user'])->group(function () {
-    Route::get('/user/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->name('user.dashboard');
+    Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
 
     Route::prefix('user/assessment-results')->name('user.assessment_results.')->group(function () {
-        Route::get('/', [App\Http\Controllers\UserController::class, 'assessmentResultsIndex'])->name('index');
-        Route::get('/{project}', [App\Http\Controllers\UserController::class, 'showAssessmentResults'])->name('show');
+        Route::get('/', [UserController::class, 'assessmentResultsIndex'])->name('index');
+        Route::get('/{project}', [UserController::class, 'showAssessmentResults'])->name('show');
     });
 
     Route::prefix('user/documents')->name('user.documents.')->group(function () {
-        Route::get('/upload', [App\Http\Controllers\UserController::class, 'uploadDocumentForm'])->name('upload');
-        Route::post('/store', [App\Http\Controllers\UserController::class, 'storeDocument'])->name('store');
+        Route::get('/upload', [UserController::class, 'uploadDocumentForm'])->name('upload');
+        Route::post('/store', [UserController::class, 'storeDocument'])->name('store');
     });
 
     Route::prefix('user/assessment-submissions')->name('user.assessment_submissions.')->group(function () {
-        Route::get('/', [App\Http\Controllers\UserController::class, 'assessmentSubmissionsIndex'])->name('index');
+        Route::get('/', [UserController::class, 'assessmentSubmissionsIndex'])->name('index');
+        Route::post('/{projectDocument}/approve', [UserController::class, 'approveSubmission'])->name('approve');
+        Route::post('/{projectDocument}/reject', [UserController::class, 'rejectSubmission'])->name('reject');
     });
+
+    Route::get('/user/documents', [UserController::class, 'documentsIndex'])->name('user.documents.index');
 });
 
 // Authenticated routes

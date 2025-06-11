@@ -32,6 +32,6 @@ class Project extends Model
 
     public function documents()
     {
-        return $this->hasMany(Document::class);
+        return $this->belongsToMany(Document::class, 'project_documents')->withPivot('is_complete', 'notes');
     }
 }

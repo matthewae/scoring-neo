@@ -211,10 +211,10 @@
                                     <tbody>
                                         @foreach ($projectDocuments as $projectDocument)
                                         <tr>
-                                            <td>{{ $project->project_name }}</td>
-                                            <td>{{ $project->project_description }}</td>
+                                            <td>{{ $projectDocument->project->project_name }}</td>
+                                            <td>{{ $projectDocument->project->project_description }}</td>
                                             <td>
-                                                <a href="{{ route('projects.assessment_results.show', $project->id) }}" class="btn btn-info btn-sm">Lihat Detail</a>
+                                                <a href="{{ route('projects.assessment_results.show', $projectDocument->project->id) }}" class="btn btn-info btn-sm">Lihat Detail</a>
                                             </td>
                                         </tr>
                                         @endforeach

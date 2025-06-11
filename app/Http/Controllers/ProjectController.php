@@ -133,6 +133,6 @@ class ProjectController extends Controller
     {
         // You can load additional data here if needed, e.g., documents, graphs
         $projectDocuments = $project->documents()->where('is_complete', true)->get();
-        return view('assessment_results.show', compact('project', 'projectDocuments'));
+        return view('user.assessment_results.show', compact('project', 'projectDocuments'));
     }
 }

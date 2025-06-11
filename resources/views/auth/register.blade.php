@@ -6,6 +6,7 @@
     <title>Register - Scoring Dokumen Konstruksi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         #particles-js {
             position: absolute;
@@ -118,7 +119,12 @@
 
                 <div class="mb-4">
                     <label for="password" class="block text-gray-800 text-sm font-bold mb-2">Password</label>
-                    <input type="password" name="password" id="password" class="form-input shadow appearance-none border rounded w-full py-3 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                    <div class="relative">
+                        <input type="password" name="password" id="password" class="form-input shadow appearance-none border rounded w-full py-3 px-4 pr-10 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                        <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600">
+                            <i class="bi bi-eye-slash"></i>
+                        </button>
+                    </div>
                     @error('password')
                         <p class="text-red-500 text-xs italic">{{ $message }}</p>
                     @enderror
@@ -126,7 +132,12 @@
 
                 <div class="mb-6">
                     <label for="password_confirmation" class="block text-gray-800 text-sm font-bold mb-2">Konfirmasi Password</label>
-                    <input type="password" name="password_confirmation" id="password_confirmation" class="form-input shadow appearance-none border rounded w-full py-3 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                    <div class="relative">
+                        <input type="password" name="password_confirmation" id="password_confirmation" class="form-input shadow appearance-none border rounded w-full py-3 px-4 pr-10 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                        <button type="button" id="toggleConfirmPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600">
+                            <i class="bi bi-eye-slash"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="flex items-center justify-between">
@@ -148,6 +159,26 @@
                     console.log('particles.js loaded - callback');
                 });
             }
+
+            const togglePassword = document.querySelector('#togglePassword');
+            const password = document.querySelector('#password');
+
+            togglePassword.addEventListener('click', function (e) {
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('bi-eye');
+                this.querySelector('i').classList.toggle('bi-eye-slash');
+            });
+
+            const toggleConfirmPassword = document.querySelector('#toggleConfirmPassword');
+            const confirmPassword = document.querySelector('#password_confirmation');
+
+            toggleConfirmPassword.addEventListener('click', function (e) {
+                const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+                confirmPassword.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('bi-eye');
+                this.querySelector('i').classList.toggle('bi-eye-slash');
+            });
         });
     </script>
 </body>

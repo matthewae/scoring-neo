@@ -7,6 +7,7 @@ use App\Models\ProjectDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class GuestController extends Controller
 {
@@ -102,14 +103,19 @@ class GuestController extends Controller
 
     public function assessmentResultsIndex()
     {
-        // Logic to retrieve assessment results for guests
-        // This might involve fetching ProjectDocuments that have been assessed
-        // and are relevant to the guest user.
-        $projectDocuments = ProjectDocument::where('guest_approval_status', 'approved') // Assuming 'approved' means assessed and ready for viewing
-                                            ->with(['project', 'document'])
-                                            ->get();
+        $projects = Project::with(['projectDocuments.document'])
+            ->where('user_id', auth()->id())
+            ->get();
 
-        return view('guest.assessment_results.index', compact('projectDocuments'));
+        return view('guest.assessment_results.index', compact('projects'));
+    }
+
+    public function assessmentResultsShow($id)
+    {
+        $project = Project::with(['projectDocuments.document'])
+            ->findOrFail($id);
+
+        return view('guest.assessment_results.show', compact('project'));
     }
 
     public function guestApprovalsIndex()

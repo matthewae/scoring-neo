@@ -32,8 +32,6 @@ class Project extends Model
 
     public function documents()
     {
-        return $this->belongsToMany(Document::class, 'project_documents')
-                    ->withPivot('is_complete', 'notes', 'file_path', 'guest_uploaded', 'approved_by_user')
-                    ->withTimestamps();
+        return $this->hasMany(Document::class);
     }
 }

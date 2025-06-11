@@ -9,16 +9,10 @@ class Document extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'document_stage_id'];
+    protected $fillable = ['project_id', 'document_name', 'file_path'];
 
-    public function stage()
+    public function project()
     {
-        return $this->belongsTo(DocumentStage::class, 'document_stage_id');
-    }
-
-    public function projects()
-    {
-        return $this->belongsToMany(Project::class, 'project_documents')
-                    ->withPivot('is_complete', 'notes', 'file_path');
+        return $this->belongsTo(Project::class);
     }
 }

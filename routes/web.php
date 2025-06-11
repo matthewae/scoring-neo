@@ -44,6 +44,25 @@ Route::prefix('guest')->name('guest.')->group(function () {
     Route::post('/projects/{project}/upload', [GuestController::class, 'uploadFile'])->name('projects.uploadFile');
     Route::get('/submission-history', [GuestController::class, 'submissionHistoryIndex'])->name('submission_history.index');
     Route::get('/assessment-results', [GuestController::class, 'assessmentResultsIndex'])->name('assessment_results.index');
+    Route::get('/assessment-results/{projectDocument}', [GuestController::class, 'assessmentResultsShow'])->name('assessment_results.show');
+});
+
+Route::middleware(['auth', 'user'])->group(function () {
+    Route::get('/user/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->name('user.dashboard');
+
+    Route::prefix('user/assessment-results')->name('user.assessment_results.')->group(function () {
+        Route::get('/', [App\Http\Controllers\UserController::class, 'assessmentResultsIndex'])->name('index');
+        Route::get('/{project}', [App\Http\Controllers\UserController::class, 'showAssessmentResults'])->name('show');
+    });
+
+    Route::prefix('user/documents')->name('user.documents.')->group(function () {
+        Route::get('/upload', [App\Http\Controllers\UserController::class, 'uploadDocumentForm'])->name('upload');
+        Route::post('/store', [App\Http\Controllers\UserController::class, 'storeDocument'])->name('store');
+    });
+
+    Route::prefix('user/assessment-submissions')->name('user.assessment_submissions.')->group(function () {
+        Route::get('/', [App\Http\Controllers\UserController::class, 'assessmentSubmissionsIndex'])->name('index');
+    });
 });
 
 // Authenticated routes

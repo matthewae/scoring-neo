@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Proyek</title>
+    <title>Pengajuan Penilaian</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
@@ -179,7 +179,7 @@
         }
 
         .btn-custom-upload {
-            background: linear-gradient(to right, #3498db, #2980b9);
+            background: linear-gradient(to right, var(--button-upload-start), var(--button-upload-end));
             color: white;
             border: none;
             padding: 12px 25px;
@@ -192,12 +192,12 @@
         }
 
         .btn-custom-upload:hover {
-            background: linear-gradient(to right, #2980b9, #3498db);
+            background: linear-gradient(to right, var(--button-upload-end), var(--button-upload-start));
             color: white;
         }
 
         .btn-custom-list {
-            background: linear-gradient(to right, #95a5a6, #7f8c8d);
+            background: linear-gradient(to right, var(--button-list-start), var(--button-list-end));
             color: white;
             border: none;
             padding: 12px 25px;
@@ -206,15 +206,16 @@
             transition: all 0.3s ease;
             display: block;
             width: 100%;
+            margin-bottom: 15px;
         }
 
         .btn-custom-list:hover {
-            background: linear-gradient(to right, #7f8c8d, #95a5a6);
+            background: linear-gradient(to right, var(--button-list-end), var(--button-list-start));
             color: white;
         }
 
         .btn-custom-view-all {
-            background: linear-gradient(to right, #2ecc71, #27ae60);
+            background: linear-gradient(to right, var(--button-view-all-start), var(--button-view-all-end));
             color: white;
             border: none;
             padding: 12px 25px;
@@ -226,66 +227,40 @@
         }
 
         .btn-custom-view-all:hover {
-            background: linear-gradient(to right, #27ae60, #2ecc71);
+            background: linear-gradient(to right, var(--button-view-all-end), var(--button-view-all-start));
             color: white;
         }
 
-        .statistic-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #eee;
-            font-size: 1.2rem;
+        .card-footer {
+            background-color: transparent;
+            border-top: none;
+            padding-top: 0;
         }
 
-        .statistic-item:last-child {
-            border-bottom: none;
+        .alert {
+            margin-top: 20px;
         }
 
-        .statistic-item span:first-child {
-            font-weight: 500;
-            color: #555;
-        }
-
-        .statistic-item span:last-child {
-            font-weight: bold;
-            color: var(--card-icon-color);
-        }
-
+        /* Responsive adjustments */
         @media (max-width: 768px) {
             .sidebar {
-                width: 80px;
-                padding: 15px;
-            }
-
-            .sidebar-header {
-                font-size: 1.2rem;
-                margin-bottom: 20px;
-            }
-
-            .sidebar ul.components li a {
-                font-size: 0.9rem;
-                text-align: center;
-                padding: 10px 5px;
-            }
-
-            .sidebar ul.components li a i {
-                margin-right: 0;
-                display: block;
-                margin-bottom: 5px;
-            }
-
-            .sidebar ul.components li a span {
-                display: none;
-            }
-
-            .sidebar .logout-button span {
-                display: none;
+                width: 100%;
+                height: auto;
+                position: relative;
+                box-shadow: none;
             }
 
             .content {
-                margin-left: 80px;
-                width: calc(100% - 80px);
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .navbar {
+                padding: 25px;
+            }
+
+            .card {
+                padding: 25px;
             }
         }
     </style>
@@ -295,87 +270,94 @@
         <!-- Sidebar -->
         <nav id="sidebar" class="sidebar">
             <div class="sidebar-header">
-                Scoring App
+                <h3 class="text-white">Scoring Neo</h3>
             </div>
-            <ul class="components">
+            <ul class="list-unstyled components">
                 <li>
-                    <a href="#"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
+                    <a href="{{ route('user.dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
                 </li>
                 <li>
-                    <a href="{{ route('projects.index') }}">
-                        <i class="fas fa-project-diagram"></i> Project
-                    </a>
+                    <a href="{{ route('user.documents.upload') }}"><i class="fas fa-upload"></i> Upload Dokumen</a>
                 </li>
                 <li>
-                    <a href="#"><i class="fas fa-upload"></i> <span>Upload Dokumen</span></a>
+                    <a href="{{ route('user.assessment_submissions.index') }}"><i class="fas fa-clipboard-list"></i> Pengajuan Penilaian</a>
                 </li>
                 <li>
-                    <a href="#"><i class="fas fa-file-alt"></i> <span>Pengajuan Penilaian</span></a>
+                    <a href="{{ route('user.assessment_results.index') }}"><i class="fas fa-chart-bar"></i> Hasil Penilaian</a>
                 </li>
                 <li>
-                    <a href="{{ route('projects.assessment_results.index') }}"><i class="fas fa-poll"></i> Hasil Penilaian</a>
+                    <a href="#"><i class="fas fa-users"></i> Manajemen Pengguna</a>
                 </li>
             </ul>
-            <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="logout-button"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+            <a href="{{ route('logout') }}" class="logout-button" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                @csrf
+            </form>
         </nav>
 
         <!-- Page Content -->
         <div id="content" class="content">
             <div class="navbar">
-                <div>
-                    <h1>Detail Proyek: {{ $project->pekerjaan }}</h1>
-                    <p>Informasi lengkap mengenai proyek dan dokumen terkait.</p>
-                </div>
+                <h1>Selamat Datang, {{ Auth::user()->name }}!</h1>
+                <p>Ini adalah halaman pengajuan penilaian dari guest.</p>
             </div>
 
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                @csrf
-            </form>
+            <div class="container">
+                <h1>Pengajuan Penilaian dari Guest</h1>
 
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-title">
-                            <i class="fas fa-info-circle"></i> Informasi Proyek
-                        </div>
-                        <div class="card-body">
-                            <p><strong>Pekerjaan:</strong> {{ $project->pekerjaan }}</p>
-                            <p><strong>Lokasi:</strong> {{ $project->lokasi }}</p>
-                            <p><strong>Kementerian/Lembaga:</strong> {{ $project->kementerian_lembaga_perangkat_daerah_institusi }}</p>
-                            <p><strong>Konsultan Perencana:</strong> {{ $project->konsultan_perencana }}</p>
-                            <p><strong>Konsultan MK:</strong> {{ $project->konsultan_mk }}</p>
-                            <p><strong>Kontraktor Pelaksana:</strong> {{ $project->kontraktor_pelaksana }}</p>
-                            <p><strong>Metode Pemilihan:</strong> {{ $project->metode_pemilihan }}</p>
-                            <p><strong>Nilai Kontrak:</strong> {{ number_format($project->nilai_kontrak, 0, ',', '.') }}</p>
-                            <p><strong>Tanggal SPMK:</strong> {{ $project->tanggal_spmk }}</p>
-                            <p><strong>Jangka Waktu:</strong> {{ $project->jangka_waktu }} hari</p>
-                        </div>
+                @if (session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
                     </div>
-                </div>
-            </div>
+                @endif
 
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-title">
-                            <i class="fas fa-clipboard-check"></i> Penilaian Dokumen
-                        </div>
-                        <div class="card-body">
-                            <p>Detail penilaian dokumen untuk proyek ini akan ditampilkan di sini.</p>
-                            <a href="{{ route('projects.assess', $project->id) }}" class="btn btn-custom-upload"><i class="fas fa-edit"></i> Lakukan Penilaian Dokumen</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <a href="{{ route('projects.index') }}" class="btn btn-custom-list"><i class="fas fa-arrow-left"></i> Kembali ke Daftar Proyek</a>
-                </div>
+                @if ($submissions->isEmpty())
+                    <p>Tidak ada pengajuan penilaian dari guest saat ini.</p>
+                @else
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Guest</th>
+                                <th>Project</th>
+                                <th>Dokumen</th>
+                                <th>File Diunggah Sendiri</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($submissions as $submission)
+                                <tr>
+                                    <td>{{ $submission->guest->name ?? 'N/A' }}</td>
+                                    <td>{{ $submission->project->name ?? 'N/A' }}</td>
+                                    <td>{{ $submission->document->document_name ?? 'N/A' }}</td>
+                                    <td>
+                                        @if ($submission->uploaded_by_guest)
+                                            <span class="badge bg-success">Ya</span>
+                                        @else
+                                            <span class="badge bg-info">Tidak</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-primary">Lihat Detail</a>
+                                        <form action="#" method="POST" style="display:inline-block;">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-success">Setujui</button>
+                                        </form>
+                                        <form action="#" method="POST" style="display:inline-block;">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-danger">Tolak</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
             </div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

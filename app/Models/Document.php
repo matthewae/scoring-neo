@@ -9,10 +9,15 @@ class Document extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['project_id', 'document_name', 'file_path'];
+    protected $fillable = ['project_id', 'name', 'file_path', 'document_stage_id'];
 
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function documentStage()
+    {
+        return $this->belongsTo(DocumentStage::class);
     }
 }

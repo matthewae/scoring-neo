@@ -56,7 +56,7 @@
             <tbody>
                 @forelse ($projectDocuments as $projectDocument)
                     <tr>
-                        <td>{{ $projectDocument->document_name }}</td>
+                        <td>{{ $projectDocument->document->document_name }}</td>
                         <td>{{ $projectDocument->project->project_name }}</td>
                         <td>
                             @if ($projectDocument->guest_approval_status === null)
@@ -94,4 +94,3 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
-@endsection

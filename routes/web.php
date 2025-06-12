@@ -52,7 +52,7 @@ Route::middleware(['auth', 'user'])->group(function () {
 
     Route::prefix('user/assessment-results')->name('user.assessment_results.')->group(function () {
         Route::get('/', [UserController::class, 'assessmentResultsIndex'])->name('index');
-        Route::get('/{project}', [UserController::class, 'showAssessmentResults'])->name('show');
+        Route::get('/{project}', [UserController::class, 'assessmentResultsShow'])->name('show');
     });
 
     Route::prefix('user/documents')->name('user.documents.')->group(function () {

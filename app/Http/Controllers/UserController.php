@@ -23,9 +23,15 @@ class UserController extends Controller
         return view('user.assessment_results.index user', compact('projectDocuments'));
     }
 
-    public function assessmentResultsShow(ProjectDocument $projectDocument)
+    public function assessmentResultsShow(Project $project)
     {
-        return view('user.assessment_results.show', compact('projectDocument'));
+        $project->load('projectDocuments');
+        $totalDocuments = $project->projectDocuments->count();
+        $completedDocuments = $project->projectDocuments->where('is_completed', true)->count();
+        $incompleteDocuments = $project->projectDocuments->where('is_completed', false)->count();
+        $completionPercentage = $totalDocuments > 0 ? ($completedDocuments / $totalDocuments) * 100 : 0;
+
+        return view('user.assessment_results.show', compact('project', 'totalDocuments', 'completedDocuments', 'incompleteDocuments', 'completionPercentage'));
     }
 
     public function uploadDocumentForm()
@@ -82,7 +88,7 @@ class UserController extends Controller
 
     public function documentsIndex()
     {
-        $projectDocuments = ProjectDocument::whereHas('project', function ($query) {
+        $projectDocuments = ProjectDocument::with('document')->whereHas('project', function ($query) {
             $query->where('user_id', auth()->id());
         })->get();
         return view('user.documents.index', compact('projectDocuments'));

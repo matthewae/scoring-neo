@@ -126,7 +126,7 @@ class ProjectController extends Controller
             $query->where('is_complete', true);
         })->get();
 
-        return view('assessment_results.index', compact('assessedProjects'));
+        return view('guest.assessment_results.index', compact('assessedProjects'));
     }
 
     public function assessmentResultsShow(Project $project)

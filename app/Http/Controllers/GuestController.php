@@ -31,13 +31,27 @@ class GuestController extends Controller
 
     public function showProject(Project $project)
     {
-        // Show project details and current scores for guests
-        return view('guest.projects.show', compact('project'));
+        $project->load(['documents' => function ($query) {
+            $query->with('documentStage')->withPivot('value')->orderBy('document_stage_id');
+        }]);
+
+        $documentsByStage = $project->documents->groupBy('documentStage.name');
+
+        return view('guest.projects.show', compact('project', 'documentsByStage'));
     }
 
     public function assess(Project $project)
     {
-        return view('guest.projects.assess', compact('project'));
+        $project->load(['documents' => function ($query) {
+            $query->with('documentStage')->withPivot('value')->orderBy('document_stage_id');
+        }]);
+
+        $documentsGroupedByStage = $project->documents->groupBy('document_stage_id');
+        $documentStages = \App\Models\DocumentStage::whereIn('id', $documentsGroupedByStage->keys())->pluck('name', 'id');
+
+
+
+        return view('guest.projects.assess', compact('project', 'documentsGroupedByStage', 'documentStages'));
     }
 
     public function proposeAssessment(ProjectDocument $projectDocument)
@@ -49,15 +63,13 @@ class GuestController extends Controller
     public function saveAssessment(Request $request, Project $project)
     {
         $request->validate([
-            'documents.*.is_complete' => 'required|boolean',
-            'documents.*.notes' => 'nullable|string|max:1000',
+            'documents.*' => 'required|numeric|min:0|max:100',
         ]);
 
         DB::transaction(function () use ($request, $project) {
-            foreach ($request->input('documents') as $document_id => $data) {
+            foreach ($request->input('documents') as $document_id => $value) {
                 $project->documents()->updateExistingPivot($document_id, [
-                    'is_complete' => $data['is_complete'],
-                    'notes' => $data['notes'],
+                    'value' => $value,
                 ]);
             }
         });
@@ -104,7 +116,7 @@ class GuestController extends Controller
     public function assessmentResultsIndex()
     {
         $projects = Project::with(['projectDocuments.document'])
-            ->where('user_id', auth()->id())
+
             ->get();
 
         return view('guest.assessment_results.index', compact('projects'));

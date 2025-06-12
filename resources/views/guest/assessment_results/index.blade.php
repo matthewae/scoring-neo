@@ -165,7 +165,7 @@
                         <h5 class="mb-0">Hasil Penilaian Proyek</h5>
                     </div>
                     <div class="card-body">
-                        @if ($projects->isEmpty())
+                        @if($projects->isEmpty())
                             <div class="alert alert-info" role="alert">
                                 Belum ada hasil penilaian yang tersedia untuk proyek Anda.
                             </div>
@@ -181,9 +181,9 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($projects as $project)
+                                        @foreach($projects as $project)
                                             <tr>
-                                                <td>{{ $project->name }}</td>
+                                                <td>{{ $project->project_name }}</td>
                                                 <td>{{ $project->projectDocuments->count() }}</td>
                                                 <td>
                                                     @php

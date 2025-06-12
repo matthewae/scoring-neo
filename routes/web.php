@@ -9,12 +9,6 @@ use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AssessmentResultController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
-
 Route::get('/', function () {
     return view('auth.login');
 });
@@ -47,6 +41,7 @@ Route::prefix('guest')->name('guest.')->group(function () {
     Route::get('/assessment-results/{projectDocument}', [GuestController::class, 'assessmentResultsShow'])->name('assessment_results.show');
 });
 
+// Routes untuk user dengan role dan login
 Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
 
@@ -67,13 +62,11 @@ Route::middleware(['auth', 'user'])->group(function () {
     });
 
     Route::get('/user/documents', [UserController::class, 'documentsIndex'])->name('user.documents.index');
-});
+    Route::get('/user/projects/sync-documents', [ProjectController::class, 'syncProjectDocuments'])->name('user.projects.syncDocuments');
+    Route::get('/user/projects/{project}/documents', [UserController::class, 'getProjectDocuments'])->name('user.projects.getDocuments');
 
-// Authenticated routes
-Route::middleware(['auth'])->group(function () {
-
-    // Project Routes
-    Route::prefix('projects')->name('projects.')->group(function () {
+    // ✅ Project Routes dipindahkan ke prefix 'user/projects'
+    Route::prefix('user/projects')->name('user.projects.')->group(function () {
         Route::get('/', [ProjectController::class, 'index'])->name('index');
         Route::get('/create', [ProjectController::class, 'create'])->name('create')->middleware('role:user');
         Route::post('/', [ProjectController::class, 'store'])->name('store');
@@ -83,13 +76,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{project}/assess', [ProjectController::class, 'assess'])->name('assess');
         Route::post('/{project}/assess', [ProjectController::class, 'saveAssessment'])->name('saveAssessment');
     });
+});
 
-    // Assessment Results (via ProjectController)
-    Route::prefix('assessment-results')->name('projects.assessment_results.')->group(function () {
-        Route::get('/', [ProjectController::class, 'assessmentResultsIndex'])->name('index');
-        Route::get('/{project}', [ProjectController::class, 'assessmentResultsShow'])->name('show');
-    });
-
+// Routes yang hanya butuh login (authenticated), bukan khusus role user
+Route::middleware(['auth'])->group(function () {
     // Guest Approval Routes
     Route::prefix('guest-approvals')->name('guest_approvals.')->group(function () {
         Route::get('/', [GuestController::class, 'guestApprovalsIndex'])->name('index');

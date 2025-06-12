@@ -302,18 +302,18 @@
                     <a href="{{ route('user.dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
                 </li>
                 <li>
-                    <a href="{{ route('projects.index') }}">
+                    <a href="{{ route('user.projects.index') }}">
                         <i class="fas fa-project-diagram"></i> Project
                     </a>
                 </li>
                 <li>
-                    <a href="#"><i class="fas fa-upload"></i> <span>Upload Dokumen</span></a>
+                    <a href="{{ route('user.documents.upload') }}"><i class="fas fa-upload"></i> <span>Upload Dokumen</span></a>
                 </li>
                 <li>
-                    <a href="#"><i class="fas fa-file-alt"></i> <span>Pengajuan Penilaian</span></a>
+                    <a href="{{ route('user.assessment_submissions.index') }}"><i class="fas fa-file-alt"></i> <span>Pengajuan Penilaian</span></a>
                 </li>
                 <li>
-                    <a href="#"><i class="fas fa-chart-bar"></i> <span>Hasil Penilaian</span></a>
+                    <a href="{{ route('user.assessment_results.index') }}"><i class="fas fa-chart-bar"></i> <span>Hasil Penilaian</span></a>
                 </li>
             </ul>
             <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="logout-button"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
@@ -333,7 +333,7 @@
             </form>
 
             <div class="container-fluid">
-                <a href="{{ route('projects.create') }}" class="btn btn-primary mb-3">Buat Proyek Baru</a>
+                <a href="{{ route('user.projects.create') }}" class="btn btn-primary mb-3">Buat Proyek Baru</a>
 
                 @if ($projects->isEmpty())
                     <p>Belum ada proyek yang tersedia.</p>
@@ -354,8 +354,8 @@
                                 <td>{{ $project->project_description }}</td>
                                     <td>{{ number_format($project->nilai_kontrak, 0, ',', '.') }}</td>
                                     <td>
-                                        <a href="{{ route('projects.show', $project->id) }}" class="btn btn-info btn-sm">Lihat</a>
-                                        <a href="{{ route('projects.edit', $project->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                        <a href="{{ route('user.projects.show', $project->id) }}" class="btn btn-info btn-sm">Lihat</a>
+                                        <a href="{{ route('user.projects.edit', $project->id) }}" class="btn btn-warning btn-sm">Edit</a>
                                         {{-- Tambahkan form delete jika diperlukan --}}
                                     </td>
                                 </tr>

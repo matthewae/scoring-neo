@@ -163,9 +163,9 @@
             <div class="sidebar-heading">Scoring System</div>
             <div class="list-group list-group-flush">
                 <a href="{{ route('user.dashboard') }}" class="list-group-item list-group-item-action"><i class="bi bi-house-door-fill me-2"></i>Dashboard</a>
-                <a href="{{ route('projects.index') }}" class="list-group-item list-group-item-action"><i class="bi bi-projector-fill me-2"></i>Project</a>
-                <a href="#" class="list-group-item list-group-item-action"><i class="bi bi-upload me-2"></i>Upload Dokumen</a>
-                <a href="#" class="list-group-item list-group-item-action"><i class="bi bi-file-earmark-text-fill me-2"></i>Pengajuan Penilaian</a>
+                <a href="{{ route('user.projects.index') }}" class="list-group-item list-group-item-action"><i class="bi bi-projector-fill me-2"></i>Project</a>
+                <!-- <a href="#" class="list-group-item list-group-item-action"><i class="bi bi-upload me-2"></i>Upload Dokumen</a>
+                <a href="#" class="list-group-item list-group-item-action"><i class="bi bi-file-earmark-text-fill me-2"></i>Pengajuan Penilaian</a> -->
                 <a href="{{ route('user.assessment_results.index') }}" class="list-group-item list-group-item-action active"><i class="bi bi-star-fill me-2"></i>Lihat Penilaian</a>
                 <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="list-group-item list-group-item-action text-danger"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
             </div>
@@ -189,7 +189,7 @@
 
             <div class="container-fluid py-4">
                 <h1 class="mb-4">Hasil Penilaian Proyek</h1>
-                @if ($projectDocuments->isEmpty())
+                @if ($assessedProjects->isEmpty())
                     <div class="alert alert-info" role="alert">
                         Belum ada hasil penilaian yang tersedia.
                     </div>
@@ -209,12 +209,12 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($projectDocuments as $projectDocument)
+                                        @foreach ($assessedProjects as $assessedProject)
                                         <tr>
-                                            <td>{{ $projectDocument->project->project_name }}</td>
-                                            <td>{{ $projectDocument->project->project_description }}</td>
+                                            <td>{{ $assessedProject->project_name }}</td>
+                                            <td>{{ $assessedProject->project_description }}</td>
                                             <td>
-                                                <a href="{{ route('user.assessment_results.show', $projectDocument->project->id) }}" class="btn btn-info btn-sm">Lihat Detail</a>
+                                                <a href="{{ route('user.assessment_results.show', $assessedProject->id) }}" class="btn btn-info btn-sm">Lihat Detail</a>
                                             </td>
                                         </tr>
                                         @endforeach
@@ -223,6 +223,7 @@
                             </div>
                         </div>
                     </div>
+                    {{ $assessedProjects->links() }}
                 @endif
             </div>
         </div>

@@ -13,13 +13,13 @@ class ProjectController extends Controller
     public function index()
     {
         $projects = Project::all();
-        return view('projects.index', compact('projects'));
+        return view('user.projects.index', compact('projects'));
     }
 
     public function create()
     {
         $documentStages = DocumentStage::with('documents')->get();
-        return view('projects.create', compact('documentStages'));
+        return view('user.projects.create', compact('documentStages'));
     }
 
     public function store(Request $request)
@@ -47,19 +47,36 @@ class ProjectController extends Controller
             $project->documents()->attach($document->id, ['is_complete' => false, 'notes' => '']);
         }
 
-        return redirect()->route('projects.index')->with('success', 'Proyek berhasil dibuat!');
+        return redirect()->route('user.projects.index')->with('success', 'Proyek berhasil dibuat!');
+    }
+
+    public function syncProjectDocuments()
+    {
+        $projects = Project::all();
+        $allDocuments = Document::all();
+
+        foreach ($projects as $project) {
+            $existingDocumentIds = $project->documents->pluck('id')->toArray();
+            foreach ($allDocuments as $document) {
+                if (!in_array($document->id, $existingDocumentIds)) {
+                    $project->documents()->attach($document->id, ['is_complete' => false, 'notes' => '']);
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'Dokumen proyek berhasil disinkronkan!');
     }
 
     public function show(Project $project)
     {
-        return view('projects.show', compact('project'));
+        return view('user.projects.show', compact('project'));
     }
 
     public function edit(Project $project)
     {
         $documentStages = DocumentStage::with('documents')->get();
         $projectDocuments = $project->documents->keyBy('id');
-        return view('projects.edit', compact('project', 'documentStages', 'projectDocuments'));
+        return view('user.projects.edit', compact('project', 'documentStages', 'projectDocuments'));
     }
 
     public function update(Request $request, Project $project)
@@ -91,14 +108,14 @@ class ProjectController extends Controller
             }
         }
 
-        return redirect()->route('projects.show', $project->id)->with('success', 'Proyek berhasil diperbarui!');
+        return redirect()->route('user.projects.show', $project->id)->with('success', 'Proyek berhasil diperbarui!');
     }
 
     public function assess(Project $project)
     {
         $documentStages = DocumentStage::with('documents')->get();
         $projectDocuments = $project->documents->keyBy('id');
-        return view('projects.assess', compact('project', 'documentStages', 'projectDocuments'));
+        return view('user.projects.assess', compact('project', 'documentStages', 'projectDocuments'));
     }
 
     public function saveAssessment(Request $request, Project $project)
@@ -117,16 +134,18 @@ class ProjectController extends Controller
             }
         });
 
-        return redirect()->route('projects.show', $project->id)->with('success', 'Penilaian dokumen berhasil disimpan!');
+        return redirect()->route('user.projects.show', $project->id)->with('success', 'Penilaian dokumen berhasil disimpan!');
     }
 
     public function assessmentResultsIndex()
     {
-        $assessedProjects = Project::whereHas('documents', function ($query) {
-            $query->where('is_complete', true);
-        })->get();
+        $assessedProjects = Project::where('user_id', auth()->id())
+            ->whereHas('documents', function ($query) {
+                $query->where('is_complete', true);
+            })
+            ->paginate(10);
 
-        return view('guest.assessment_results.index', compact('assessedProjects'));
+        return view('user.assessment_results.index', compact('assessedProjects'));
     }
 
     public function assessmentResultsShow(Project $project)

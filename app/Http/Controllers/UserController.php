@@ -17,10 +17,13 @@ class UserController extends Controller
 
     public function assessmentResultsIndex()
     {
-        $projectDocuments = ProjectDocument::whereHas('project', function ($query) {
-            $query->where('user_id', auth()->id());
-        })->get();
-        return view('user.assessment_results.index user', compact('projectDocuments'));
+        $assessedProjects = Project::where('user_id', auth()->id())
+            ->whereHas('documents', function ($query) {
+                $query->where('is_complete', true);
+            })
+            ->paginate(10);
+
+        return view('user.assessment_results.index user', compact('assessedProjects'));
     }
 
     public function assessmentResultsShow(Project $project)
@@ -44,22 +47,29 @@ class UserController extends Controller
     {
         $request->validate([
             'project_id' => 'required|exists:projects,id',
-            'document_name' => 'required|string|max:255',
-            'file' => 'nullable|mimes:pdf|max:1048576', // Max 1GB (1024 * 1024 = 1048576 KB)
+            'document_id' => 'required|exists:documents,id',
+            'document_file' => 'required|file|mimes:pdf|max:1048576', // Max 1GB
         ]);
 
         $filePath = null;
-        if ($request->hasFile('file')) {
-            $filePath = $request->file('file')->store('documents', 'public');
+        if ($request->hasFile('document_file')) {
+            $filePath = $request->file('document_file')->store('project_documents', 'public');
         }
 
-        Document::create([
+        $projectDocument = ProjectDocument::firstOrNew([
             'project_id' => $request->project_id,
-            'document_name' => $request->document_name,
-            'file_path' => $filePath,
+            'document_id' => $request->document_id,
         ]);
 
-        return redirect()->back()->with('success', 'Dokumen berhasil diunggah!');
+        $projectDocument->fill([
+            'file_path' => $filePath,
+            'guest_approval_status' => false,
+        ]);
+
+        $projectDocument->save();
+
+        return redirect()->back()->with('success', 'Dokumen berhasil ditambahkan ke proyek!');
+
     }
 
     public function assessmentSubmissionsIndex()
@@ -92,5 +102,11 @@ class UserController extends Controller
             $query->where('user_id', auth()->id());
         })->get();
         return view('user.documents.index', compact('projectDocuments'));
+    }
+
+    public function getProjectDocuments(Project $project)
+    {
+        $documents = $project->documents()->get(['documents.id', 'documents.name']);
+        return response()->json($documents);
     }
 }

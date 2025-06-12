@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('guest_uploaded_file_path')->nullable();
             $table->boolean('guest_approval_status')->nullable(); // null: pending, true: approved, false: rejected
             $table->timestamps();
+            $table->unique(['project_id', 'document_id']);
         });
     }
 

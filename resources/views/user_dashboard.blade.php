@@ -302,7 +302,7 @@
                     <a href="{{ route('user.dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
                 </li>
                 <li>
-                    <a href="{{ route('projects.index') }}">
+                    <a href="{{ route('user.projects.index') }}">
                         <i class="fas fa-project-diagram"></i> Project
                     </a>
                 </li>

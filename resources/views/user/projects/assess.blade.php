@@ -81,10 +81,10 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('guest.dashboard') }}">Dashboard</a>
+                        <a class="nav-link" href="{{ route('user.dashboard') }}">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('guest.projects.index') }}">Proyek</a>
+                        <a class="nav-link" href="{{ route('user.projects.index') }}">Proyek</a>
                     </li>
                 </ul>
             </div>
@@ -95,7 +95,7 @@
         <div class="container">
             <h1 class="mb-4">Penilaian Dokumen untuk Proyek: {{ $project->pekerjaan }}</h1>
 
-            <form action="{{ route('projects.saveAssessment', $project->id) }}" method="POST">
+            <form action="{{ route('user.projects.saveAssessment', $project->id) }}" method="POST">
                 @csrf
 
                 <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
@@ -135,7 +135,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary mt-4">Simpan Penilaian</button>
-                <a href="{{ route('projects.index') }}" class="btn btn-secondary mt-4">Batal</a>
+                <a href="{{ route('user.projects.index') }}" class="btn btn-secondary mt-4">Batal</a>
             </form>
         </div>
     </div>

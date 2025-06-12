@@ -302,7 +302,7 @@
                     <a href="#"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
                 </li>
                 <li>
-                    <a href="{{ route('projects.index') }}">
+                    <a href="{{ route('user.projects.index') }}">
                         <i class="fas fa-project-diagram"></i> Project
                     </a>
                 </li>
@@ -313,7 +313,7 @@
                     <a href="#"><i class="fas fa-file-alt"></i> <span>Pengajuan Penilaian</span></a>
                 </li>
                 <li>
-                    <a href="{{ route('projects.assessment_results.index') }}"><i class="fas fa-poll"></i> Hasil Penilaian</a>
+                    <a href="{{ route('user.assessment_results.index') }}"><i class="fas fa-poll"></i> Hasil Penilaian</a>
                 </li>
             </ul>
             <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="logout-button"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
@@ -362,7 +362,7 @@
                         </div>
                         <div class="card-body">
                             <p>Detail penilaian dokumen untuk proyek ini akan ditampilkan di sini.</p>
-                            <a href="{{ route('projects.assess', $project->id) }}" class="btn btn-custom-upload"><i class="fas fa-edit"></i> Lakukan Penilaian Dokumen</a>
+                            <a href="{{ route('user.projects.assess', $project->id) }}" class="btn btn-custom-upload"><i class="fas fa-edit"></i> Lakukan Penilaian Dokumen</a>
                         </div>
                     </div>
                 </div>
@@ -370,7 +370,7 @@
 
             <div class="row">
                 <div class="col-md-12">
-                    <a href="{{ route('projects.index') }}" class="btn btn-custom-list"><i class="fas fa-arrow-left"></i> Kembali ke Daftar Proyek</a>
+                    <a href="{{ route('user.projects.index') }}" class="btn btn-custom-list"><i class="fas fa-arrow-left"></i> Kembali ke Daftar Proyek</a>
                 </div>
             </div>
         </div>

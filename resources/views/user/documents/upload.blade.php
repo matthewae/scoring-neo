@@ -113,7 +113,7 @@
             <div class="sidebar-heading">Scoring System</div>
             <div class="list-group list-group-flush">
                 <a href="{{ route('user.dashboard') }}" class="list-group-item list-group-item-action"><i class="bi bi-house-door-fill me-2"></i>Dashboard</a>
-                <a href="{{ route('projects.index') }}" class="list-group-item list-group-item-action"><i class="bi bi-projector-fill me-2"></i>Project</a>
+                <a href="{{ route('user.projects.index') }}" class="list-group-item list-group-item-action"><i class="bi bi-projector-fill me-2"></i>Project</a>
                 <a href="{{ route('user.documents.upload') }}" class="list-group-item list-group-item-action active"><i class="bi bi-upload me-2"></i>Upload Dokumen</a>
                 <a href="#" class="list-group-item list-group-item-action"><i class="bi bi-file-earmark-text-fill me-2"></i>Pengajuan Penilaian</a>
                 <a href="{{ route('user.assessment_results.index') }}" class="list-group-item list-group-item-action"><i class="bi bi-star-fill me-2"></i>Lihat Penilaian</a>
@@ -148,16 +148,24 @@
                             @csrf
                             <div class="mb-3">
                                 <label for="project_id" class="form-label">Pilih Proyek</label>
-                                <select class="form-select" id="project_id" name="project_id" required>
-                                    <option value="">-- Pilih Proyek --</option>
+                                <div class="input-group">
+                                    <select class="form-select" id="project_id" name="project_id" required>
+                                        <option value="">-- Pilih Proyek --</option>
                                     @foreach($projects as $project)
                                         <option value="{{ $project->id }}">{{ $project->project_name }}</option>
                                     @endforeach
                                 </select>
+                                    <button class="btn btn-primary" type="button" id="selectProjectBtn">Pilih Proyek</button>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="document_name" class="form-label">Nama Dokumen</label>
-                                <input type="text" class="form-control" id="document_name" name="document_name" required>
+                            <div id="documentSelectionGroup" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="document_id" class="form-label">Nama Dokumen</label>
+                                    <select class="form-select" id="document_id" name="document_id" required>
+                                        <option value="">-- Pilih Dokumen --</option>
+                                    </select>
+                                    <button class="btn btn-outline-secondary" type="button" id="refreshDocumentsBtn"><i class="fas fa-sync-alt"></i></button>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="document_file" class="form-label">File Dokumen (PDF)</label>
@@ -183,6 +191,42 @@
                 document.getElementById('wrapper').classList.toggle('toggled');
             });
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const projectIdSelect = document.getElementById('project_id');
+            const documentIdSelect = document.getElementById('document_id');
+            const refreshDocumentsBtn = document.getElementById('refreshDocumentsBtn');
+            const selectProjectBtn = document.getElementById('selectProjectBtn');
+            const documentSelectionGroup = document.getElementById('documentSelectionGroup');
+
+            selectProjectBtn.addEventListener('click', function() {
+                if (projectIdSelect.value) {
+                    loadDocumentsForProject();
+                    documentSelectionGroup.style.display = 'block';
+                } else {
+                    alert('Silakan pilih proyek terlebih dahulu.');
+                }
+            });
+
+            refreshDocumentsBtn.addEventListener('click', loadDocumentsForProject);
+
+            function loadDocumentsForProject() {
+                const projectId = projectIdSelect.value;
+                documentIdSelect.innerHTML = '<option value="">-- Pilih Dokumen --</option>'; // Clear previous options
+
+                if (projectId) {
+                    fetch(`/user/projects/${projectId}/documents`)
+                        .then(response => response.json())
+                        .then(data => {
+                            data.forEach(document => {
+                                const option = document.name ? `<option value="${document.id}">${document.name}</option>` : '';
+                                documentIdSelect.innerHTML += option;
+                            });
+                        })
+                        .catch(error => console.error('Error fetching documents:', error));
+                }
+            }
+        });
     </script>
 </body>
 </html>

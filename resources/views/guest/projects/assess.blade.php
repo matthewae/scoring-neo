@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajukan Penilaian</title>
+    <title>Ajukan Pengajuan Dokumen</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -76,9 +76,9 @@
 </head>
 <body>
     <div class="container">
-        <h1>Ajukan Penilaian untuk Proyek: {{ $project->name }}</h1>
+        <h1>Ajukan Pengajuan Dokumen untuk Proyek: {{ $project->name }}</h1>
 
-        <form action="{{ route('guest.projects.saveAssessment', $project->id) }}" method="POST">
+        <form action="{{ route('guest.projects.saveAssessment', $project->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <div class="vertical-tabs">
@@ -99,18 +99,23 @@
                                         <thead class="table-light">
                                             <tr>
                                                 <th>Nama Dokumen</th>
-                                                <th>Deskripsi</th>
-                                                <th>Nilai</th>
+                                                <th>Upload Dokumen</th>
+                                                <th>Pilih</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @forelse($documentsGroupedByStage[$stageId] ?? [] as $document)
                                                 <tr>
                                                     <td>{{ $document->name }}</td>
-                                                    <td>{{ $document->name }}</td>
                                                     <td>
                                                         <div class="form-group mb-0">
-                                                            <input type="number" name="documents[{{ $document->id }}]" id="document_{{ $document->id }}" class="form-control" min="0" max="100" value="{{ $document->pivot->value ?? '' }}" required>
+                                                            <input type="file" name="documents[{{ $document->id }}][file]" id="document_file_{{ $document->id }}" class="form-control">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="documents[{{ $document->id }}][selected]" value="1" id="document_selected_{{ $document->id }}">
+                                                            <label class="form-check-label" for="document_selected_{{ $document->id }}">Ajukan</label>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -128,7 +133,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary mt-4">Kirim Penilaian</button>
+            <button type="submit" class="btn btn-primary mt-4">Kirim Pengajuan</button>
             <a href="{{ route('guest.projects.show', $project->id) }}" class="btn btn-secondary mt-4">Batal</a>
         </form>
     </div>

@@ -79,12 +79,14 @@ Route::middleware(['auth', 'user'])->group(function () {
 });
 
 // Routes yang hanya butuh login (authenticated), bukan khusus role user
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'user'])->group(function () {
+    // ... existing code ...
+
     // Guest Approval Routes
     Route::prefix('guest-approvals')->name('guest_approvals.')->group(function () {
-        Route::get('/', [GuestController::class, 'guestApprovalsIndex'])->name('index');
-        Route::post('/{document}/approve', [GuestController::class, 'approveGuestProposal'])->name('approve');
-        Route::post('/{document}/reject', [GuestController::class, 'rejectGuestProposal'])->name('reject');
+        Route::get('/', [UserController::class, 'guestApprovalsIndex'])->name('index');
+        Route::post('/{document}/approve', [UserController::class, 'approveGuestProposal'])->name('approve');
+        Route::post('/{document}/reject', [UserController::class, 'rejectGuestProposal'])->name('reject');
     });
 
     // User Profile Routes

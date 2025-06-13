@@ -9,13 +9,20 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        html, body {
+            height: 100%;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
         }
         #wrapper {
             display: flex;
             width: 100%;
+            flex: 1;
+            min-height: 100vh;
         }
         #sidebar-wrapper {
             min-width: 250px;
@@ -139,7 +146,7 @@
             <div class="list-group list-group-flush">
                 <a href="{{ route('guest.dashboard') }}" class="list-group-item list-group-item-action"><i class="bi bi-house-door-fill me-2"></i>Dashboard</a>
                 <a href="{{ route('guest.projects.index') }}" class="list-group-item list-group-item-action"><i class="bi bi-file-earmark-arrow-up-fill me-2"></i>Pengajuan Dokumen</a>
-                <a href="#" class="list-group-item list-group-item-action"><i class="bi bi-star-fill me-2"></i>Lihat Penilaian</a>
+                <a href="{{ route('guest.assessment_results.index') }}" class="list-group-item list-group-item-action"><i class="bi bi-star-fill me-2"></i>Lihat Penilaian</a>
                 <a href="{{ route('guest.submission_history.index') }}" class="list-group-item list-group-item-action active"><i class="bi bi-clock-history me-2"></i>Riwayat Pengajuan</a>
                 <a href="{{ route('guest.guide') }}" class="list-group-item list-group-item-action"><i class="bi bi-book-fill me-2"></i>Panduan</a>
                 <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="list-group-item list-group-item-action text-danger"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>

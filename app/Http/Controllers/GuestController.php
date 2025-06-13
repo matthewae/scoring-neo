@@ -5,9 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\ProjectDocument;
 use Illuminate\Http\Request;
+    use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class GuestController extends Controller
 {
@@ -63,18 +62,58 @@ class GuestController extends Controller
     public function saveAssessment(Request $request, Project $project)
     {
         $request->validate([
-            'documents.*' => 'required|numeric|min:0|max:100',
+            'documents.*.selected' => 'nullable|boolean',
+            'documents.*.file' => 'nullable|file|mimes:pdf,doc,docx,zip|max:2048',
         ]);
 
+        \Log::info('saveAssessment method called for project: ' . $project->id);
+        \Log::info('Request data: ' . json_encode($request->all()));
+
         DB::transaction(function () use ($request, $project) {
-            foreach ($request->input('documents') as $document_id => $value) {
-                $project->documents()->updateExistingPivot($document_id, [
-                    'value' => $value,
-                ]);
+            foreach ($request->input('documents') as $document_id => $documentData) {
+                $projectDocument = ProjectDocument::where('project_id', $project->id)
+                                                ->where('document_id', $document_id)
+                                                ->first();
+
+                if (!$projectDocument) {
+                    \Log::warning('ProjectDocument not found for document_id: ' . $document_id . ' and project_id: ' . $project->id);
+                    continue;
+                }
+
+                $updateData = [];
+
+                // Check if the document is selected for submission
+                if (isset($documentData['selected']) && $documentData['selected']) {
+                    $updateData['guest_approval_status'] = null; // Set to null for pending approval
+
+                    // Handle file upload if present
+                    if ($request->hasFile('documents.' . $document_id . '.file')) {
+                        $filePath = $request->file('documents.' . $document_id . '.file')->store('guest_uploads', 'public');
+                        $updateData['guest_uploaded_file_path'] = $filePath;
+                        \Log::info('File uploaded: ' . $filePath);
+                    }
+                } else {
+                    // If not selected, ensure approval status and file path are cleared
+                    $updateData['guest_approval_status'] = false; // Or some other default, e.g., false for not submitted
+                    $updateData['guest_uploaded_file_path'] = null;
+                    // Optionally delete the file if it was previously uploaded and now unselected
+                    if ($projectDocument->guest_uploaded_file_path) {
+                        Storage::disk('public')->delete($projectDocument->guest_uploaded_file_path);
+                        \Log::info('Deleted old file: ' . $projectDocument->guest_uploaded_file_path);
+                    }
+                }
+
+                if (!empty($updateData)) {
+                    $projectDocument->update($updateData);
+                    \Log::info('ProjectDocument updated for document_id: ' . $document_id . ' with data: ' . json_encode($updateData));
+                } else {
+                    \Log::info('No update data for document_id: ' . $document_id);
+                }
             }
         });
 
-        return redirect()->route('guest.projects.show', $project->id)->with('success', 'Penilaian dokumen berhasil disimpan!');
+        \Log::info('saveAssessment transaction completed.');
+        return redirect()->route('guest.projects.show', $project->id)->with('success', 'Pengajuan dokumen berhasil dikirim!');
     }
 
     public function saveProposedAssessment(Request $request, ProjectDocument $projectDocument)

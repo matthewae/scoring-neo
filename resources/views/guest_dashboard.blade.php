@@ -232,7 +232,7 @@
                                 <i class="bi bi-clock-history text-info icon-large"></i>
                                 <h5 class="card-title">Riwayat Pengajuan</h5>
                                 <p class="card-text text-muted">Pantau status dan riwayat pengajuan dokumen Anda.</p>
-                                <a href="#" class="btn btn-info mt-3">Lihat Riwayat</a>
+                                <a href="{{ route('guest.submission_history.index') }}" class="btn btn-info mt-3">Lihat Riwayat</a>
                             </div>
                         </div>
                     </div>

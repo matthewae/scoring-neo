@@ -178,125 +178,131 @@
     </div>
 
     <div class="card mb-4">
-    <div class="card-header">Dokumen Proyek per Tahap</div>
-    <div class="card-body">
-        @if ($project->projectDocuments->isEmpty())
-            <p>Tidak ada dokumen yang terkait dengan proyek ini.</p>
-        @else
-            @php
-                $documentsByStage = $project->projectDocuments->groupBy('document.document_stage_id');
-                $stages = \App\Models\DocumentStage::all()->sortBy('id');
-
-                $chartData = [];
-                $totalCompleteCount = 0;
-                $totalNotCompleteCount = 0;
-
-                foreach ($stages as $stage) {
-                    $completeCount = 0;
-                    $notCompleteCount = 0;
-                    if ($documentsByStage->has($stage->id)) {
-                        foreach ($documentsByStage[$stage->id] as $projectDocument) {
-                            if ($projectDocument->is_complete) {
-                                $completeCount++;
-                                $totalCompleteCount++;
-                            } else {
-                                $notCompleteCount++;
-                                $totalNotCompleteCount++;
-                            }
-                        }
-                    }
-                    $chartData[$stage->id] = [
-                        'complete' => $completeCount,
-                        'not_complete' => $notCompleteCount,
-                    ];
-                }
-
-                $overallChartData = [
-                    'complete' => $totalCompleteCount,
-                    'not_complete' => $totalNotCompleteCount,
-                ];
-            @endphp
-
-            @if($documentsByStage->isEmpty())
-                <p>Tidak ada dokumen yang terkait dengan proyek ini.</p>
-            @else
-                {{-- Navigasi --}}
-                <div class="d-flex justify-content-center mb-3">
-                    <button class="btn btn-outline-secondary me-2" onclick="prevStage()">←</button>
-                    @foreach ($stages as $stage)
-                        <button class="btn btn-outline-primary stage-dot me-1" data-stage-id="{{ $stage->id }}" onclick="showStage({{ $stage->id }})">
-                            {{ $loop->iteration }}
-                        </button>
-                    @endforeach
-                    <button class="btn btn-outline-secondary ms-2" onclick="nextStage()">→</button>
-                </div>
-
-                {{-- Konten Per Tahap --}}
-                @foreach ($stages as $stage)
-                    <div id="stage-{{ $stage->id }}" class="stage-content" style="display: none;">
-                        <h5 class="mb-3">Tahap: {{ $stage->name }}</h5>
-
-                        @if ($documentsByStage->has($stage->id) && !$documentsByStage[$stage->id]->isEmpty())
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Nama Dokumen</th>
-                                        <th>Status Persetujuan</th>
-                                        <th>Catatan</th>
-                                        <th>File</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($documentsByStage[$stage->id] as $projectDocument)
-                                        <tr>
-                                            <td>{{ $projectDocument->document->name }}</td>
-                                            <td>
-                                                <span class="badge 
-                                                    @if($projectDocument->is_complete) bg-success
-                                                    @else bg-warning text-dark
-                                                    @endif">
-                                                    {{ $projectDocument->is_complete ? 'Ada' : 'Tidak Ada' }}
-                                                </span>
-                                            </td>
-                                            <td>{{ $projectDocument->notes ?? 'Tidak ada catatan' }}</td>
-                                            <td>
-                                                @if ($projectDocument->file_path)
-                                                    <a href="{{ Storage::url($projectDocument->file_path) }}" target="_blank" class="btn btn-info btn-sm">Lihat File</a>
-                                                @else
-                                                    Tidak ada file
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        @else
-                            <p>Tidak ada dokumen untuk tahap ini.</p>
-                        @endif
-                    </div>
-                @endforeach
-            @endif
-        @endif
-    </div>
-</div>
-
-
-
-    <div class="card mb-4">
         <div class="card-header">Grafik Total Hasil Penilaian</div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>Grafik Total Hasil Penilaian</h5>
-                    <canvas id="overallAssessmentChart"></canvas>
-                </div>
-                <div class="col-md-6">
-                    <h5 class="card-title text-center">Per Tahap</h5>
+                    <h5 class="card-title text-center">Grafik Per Tahap</h5>
                                 <div style="width: 400px; margin: auto;">
                                     <canvas id="assessmentChart"></canvas>
                                 </div>
                             </div>
+                <div class="col-md-6">
+                    <h5 class="card-title text-center">Grafik Total Hasil Penilaian</h5>
+                    <canvas id="overallAssessmentChart"></canvas>
+                </div>
                         </div>
+    </div>
+
+
+
+    <div class="card mb-4">
+        <div class="card-header">Dokumen Proyek per Tahap</div>
+        <div class="card-body">
+            @if ($project->projectDocuments->isEmpty())
+                <p>Tidak ada dokumen yang terkait dengan proyek ini.</p>
+            @else
+                @php
+                    $documentsByStage = $project->projectDocuments->groupBy('document.document_stage_id');
+                    $stages = \App\Models\DocumentStage::all()->sortBy('id');
+
+                    $chartData = [];
+                    $totalCompleteCount = 0;
+                    $totalNotCompleteCount = 0;
+
+                    foreach ($stages as $stage) {
+                        $completeCount = 0;
+                        $notCompleteCount = 0;
+                        if ($documentsByStage->has($stage->id)) {
+                            foreach ($documentsByStage[$stage->id] as $projectDocument) {
+                                if ($projectDocument->is_complete) {
+                                    $completeCount++;
+                                    $totalCompleteCount++;
+                                } else {
+                                    $notCompleteCount++;
+                                    $totalNotCompleteCount++;
+                                }
+                            }
+                        }
+                        $chartData[$stage->id] = [
+                            'complete' => $completeCount,
+                            'not_complete' => $notCompleteCount,
+                            'total' => $completeCount + $notCompleteCount,
+                            'percentage_complete' => ($completeCount + $notCompleteCount) > 0 ? round(($completeCount / ($completeCount + $notCompleteCount)) * 100, 2) : 0,
+                            'percentage_not_complete' => ($completeCount + $notCompleteCount) > 0 ? round(($notCompleteCount / ($completeCount + $notCompleteCount)) * 100, 2) : 0,
+                        ];
+                    }
+
+                    $overallChartData = [
+                        'complete' => $totalCompleteCount,
+                        'not_complete' => $totalNotCompleteCount,
+                        'total' => $totalCompleteCount + $totalNotCompleteCount,
+                        'percentage_complete' => ($totalCompleteCount + $totalNotCompleteCount) > 0 ? round(($totalCompleteCount / ($totalCompleteCount + $totalNotCompleteCount)) * 100, 2) : 0,
+                        'percentage_not_complete' => ($totalCompleteCount + $totalNotCompleteCount) > 0 ? round(($totalNotCompleteCount / ($totalCompleteCount + $totalNotCompleteCount)) * 100, 2) : 0,
+                    ];
+                @endphp
+
+                @if($documentsByStage->isEmpty())
+                    <p>Tidak ada dokumen yang terkait dengan proyek ini.</p>
+                @else
+                    {{-- Navigasi --}}
+                    <div class="d-flex justify-content-center mb-3">
+                        <button class="btn btn-outline-secondary me-2" onclick="prevStage()">←</button>
+                        @foreach ($stages as $stage)
+                            <button class="btn btn-outline-primary stage-dot me-1" data-stage-id="{{ $stage->id }}" onclick="showStage({{ $stage->id }})">
+                                {{ $loop->iteration }}
+                            </button>
+                        @endforeach
+                        <button class="btn btn-outline-secondary ms-2" onclick="nextStage()">→</button>
+                    </div>
+
+                    {{-- Konten Per Tahap --}}
+                    @foreach ($stages as $stage)
+                        <div id="stage-{{ $stage->id }}" class="stage-content" style="display: none;">
+                            <h5 class="mb-3">Tahap: {{ $stage->name }}</h5>
+
+                            @if ($documentsByStage->has($stage->id) && !$documentsByStage[$stage->id]->isEmpty())
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Dokumen</th>
+                                            <th>Status Persetujuan</th>
+                                            <th>Catatan</th>
+                                            <th>File</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($documentsByStage[$stage->id] as $projectDocument)
+                                            <tr>
+                                                <td>{{ $projectDocument->document->name }}</td>
+                                                <td>
+                                                    <span class="badge 
+                                                        @if($projectDocument->is_complete) bg-success
+                                                        @else bg-warning text-dark
+                                                        @endif">
+                                                        {{ $projectDocument->is_complete ? 'Ada' : 'Tidak Ada' }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ $projectDocument->notes ?? 'Tidak ada catatan' }}</td>
+                                                <td>
+                                                    @if ($projectDocument->file_path)
+                                                        <a href="{{ Storage::url($projectDocument->file_path) }}" target="_blank" class="btn btn-info btn-sm">Lihat File</a>
+                                                    @else
+                                                        Tidak ada file
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            @else
+                                <p>Tidak ada dokumen untuk tahap ini.</p>
+                            @endif
+                        </div>
+                    @endforeach
+                @endif
+            @endif
+        </div>
     </div>
 
     <a href="{{ route('guest.assessment_results.index') }}" class="btn btn-secondary">Kembali ke Daftar Hasil Penilaian</a>
@@ -381,37 +387,37 @@
     // Inisialisasi Chart.js - Per Stage
     const assessmentChartCanvas = document.getElementById('assessmentChart');
     const assessmentChart = new Chart(assessmentChartCanvas, {
-        type: 'pie',
+        type: 'bar',
         data: {
-            labels: ['Ada', 'Tidak Ada'],
+            labels: ['Lengkap', 'Belum Lengkap'],
             datasets: [{
-                label: 'Status Dokumen',
+                label: 'Jumlah Dokumen',
                 data: [0, 0],
                 backgroundColor: [
-                    'rgba(40, 167, 69, 0.7)',  // Hijau - Ada
-                    'rgba(255, 193, 7, 0.7)'   // Kuning - Tidak Ada
+                    'rgba(40, 167, 69, 0.7)', // Green for 'Lengkap'
+                    'rgba(220, 53, 69, 0.7)'  // Red for 'Belum Lengkap'
                 ],
                 borderColor: [
                     'rgba(40, 167, 69, 1)',
-                    'rgba(255, 193, 7, 1)'
+                    'rgba(220, 53, 69, 1)'
                 ],
-                borderWidth: 1,
-                borderRadius: 5 // Add border radius
+                borderWidth: 1
             }]
         },
         options: {
             responsive: true,
-            aspectRatio: 1, // Make the chart square
             plugins: {
                 title: {
                     display: true,
-                    text: 'Status Kelengkapan Dokumen',
+                    text: 'Status Kelengkapan Dokumen per Tahap',
                     font: {
                         size: 16
                     }
                 },
                 datalabels: {
-                    color: '#fff',
+                    color: '#000',
+                    anchor: 'end',
+                    align: 'top',
                     formatter: (value, context) => {
                         const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                         const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
@@ -419,7 +425,22 @@
                     }
                 },
                 legend: {
-                    position: 'bottom'
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Jumlah Dokumen'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Status'
+                    }
                 }
             }
         }
@@ -429,6 +450,7 @@
     function updateChartData(stageId) {
         const dataForStage = allStageData[stageId];
         if (dataForStage) {
+            assessmentChart.data.labels = ['Lengkap (' + dataForStage.percentage_complete + '%)', 'Belum Lengkap (' + dataForStage.percentage_not_complete + '%)'];
             assessmentChart.data.datasets[0].data = [dataForStage.complete, dataForStage.not_complete];
         } else {
             // If no data for the stage, assume 0 complete and 0 not complete documents
@@ -480,39 +502,57 @@
     // Pie Chart - Keseluruhan
     const overallAssessmentChartCanvas = document.getElementById('overallAssessmentChart');
     const overallAssessmentChart = new Chart(overallAssessmentChartCanvas, {
-        type: 'pie',
+        type: 'bar',
         data: {
-            labels: detailedChartLabels,
+            labels: ['Lengkap', 'Belum Lengkap'],
             datasets: [{
-                label: 'Status Dokumen per Tahap',
-                data: detailedChartValues,
-                backgroundColor: detailedChartColors,
-                borderColor: detailedChartColors.map(color => color.replace('0.7', '1')),
-                borderWidth: 1,
-                borderRadius: 5 // Add border radius
+                label: 'Persentase Dokumen',
+                data: [overallChartData.percentage_complete, overallChartData.percentage_not_complete],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.7)', // Green for 'Lengkap'
+                    'rgba(220, 53, 69, 0.7)'  // Red for 'Belum Lengkap'
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(220, 53, 69, 1)'
+                ],
+                borderWidth: 1
             }]
         },
         options: {
             responsive: true,
-            aspectRatio: 1, // Make the chart square
             plugins: {
                 title: {
                     display: true,
-                    text: 'Status Kelengkapan Dokumen Keseluruhan',
+                    text: 'Persentase Kelengkapan Dokumen Keseluruhan',
                     font: {
                         size: 16
                     }
                 },
                 datalabels: {
-                    color: '#fff',
-                    formatter: (value, context) => {
-                        const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
-                        return value + ' (' + percentage + ')';
-                    }
+                    color: '#000',
+                    anchor: 'end',
+                    align: 'top',
+                    formatter: (value) => value + '%'
                 },
                 legend: {
-                    position: 'bottom'
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Persentase (%)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Status'
+                    }
                 }
             }
         }

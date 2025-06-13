@@ -12,7 +12,12 @@ class UserController extends Controller
 {
     public function dashboard()
     {
-        return view('user_dashboard');
+        $pendingProposals = ProjectDocument::whereNull('guest_approval_status')
+            ->whereNotNull('guest_uploaded_file_path')
+            ->with(['project', 'document'])
+            ->get();
+
+        return view('user_dashboard', compact('pendingProposals'));
     }
 
     public function assessmentResultsIndex()
@@ -108,5 +113,27 @@ class UserController extends Controller
     {
         $documents = $project->documents()->get(['documents.id', 'documents.name']);
         return response()->json($documents);
+    }
+
+    public function guestApprovalsIndex()
+    {
+        $guestProposals = ProjectDocument::whereNotNull('guest_uploaded_file_path')
+            ->whereNull('guest_approval_status')
+            ->with(['project', 'document'])
+            ->get();
+
+        return view('user.guest_approvals.index', compact('guestProposals'));
+    }
+
+    public function approveGuestProposal(ProjectDocument $document)
+    {
+        $document->update(['guest_approval_status' => true]);
+        return redirect()->back()->with('success', 'Guest proposal approved successfully.');
+    }
+
+    public function rejectGuestProposal(ProjectDocument $document)
+    {
+        $document->update(['guest_approval_status' => false]);
+        return redirect()->back()->with('error', 'Guest proposal rejected.');
     }
 }

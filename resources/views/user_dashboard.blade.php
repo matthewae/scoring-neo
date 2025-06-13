@@ -352,8 +352,11 @@
                         </div>
                         <div class="card-body">
                             <p>Daftar pengajuan penilaian dari guest.</p>
-                            <p>Tidak ada pengajuan penilaian saat ini.</p>
-                            <a href="#" class="btn btn-custom-view-all"><i class="fas fa-eye"></i> Lihat Semua Pengajuan</a>
+                            <div class="statistic-item">
+                                <span>Pengajuan Pending</span>
+                                <span>{{ $pendingProposals->count() }}</span>
+                            </div>
+                            <a href="{{ route('guest_approvals.index') }}" class="btn btn-primary btn-sm">Lihat Semua Pengajuan</a>
                         </div>
                     </div>
                 </div>

@@ -311,6 +311,53 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <!-- Custom JavaScript for sidebar toggle and chart -->
+
+    @php
+    $detailedChartLabels = [];
+    $detailedChartValues = [];
+    $detailedChartColors = [];
+
+    // Skema warna dasar
+    $baseColors = [
+        '#003f5c', '#58508d', '#bc5090', '#ff6361', '#ffa600',
+        '#2ca02c', '#1f77b4', '#ff7f0e', '#d62728', '#9467bd',
+        '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
+    ];
+
+    $colorIndex = 0;
+
+    foreach ($stages as $stage) {
+        $stageId = $stage->id;
+        $stageName = $stage->name;
+        $complete = $chartData[$stageId]['complete'] ?? 0;
+        $notComplete = $chartData[$stageId]['not_complete'] ?? 0;
+
+        // Warna utama dan turunan (Ada vs Tidak Ada)
+        $mainColor = $baseColors[$colorIndex % count($baseColors)];
+        $notCompleteColor = $baseColors[($colorIndex + 5) % count($baseColors)];
+
+        // Label dan nilai "Ada"
+        $detailedChartLabels[] = "$stageName - Ada";
+        $detailedChartValues[] = $complete;
+        $detailedChartColors[] = $mainColor;
+
+        // Label dan nilai "Tidak Ada"
+        $detailedChartLabels[] = "$stageName - Tidak Ada";
+        $detailedChartValues[] = $notComplete;
+        $detailedChartColors[] = $notCompleteColor;
+
+        $colorIndex++;
+    }
+@endphp
+
+<script>
+    const detailedChartLabels = @json($detailedChartLabels);
+    const detailedChartValues = @json($detailedChartValues);
+    const detailedChartColors = @json($detailedChartColors);
+</script>
+
+
+
     <script>
     // Toggle sidebar
     var sidebarToggle = document.getElementById('sidebarToggle');
@@ -426,18 +473,12 @@
     const overallAssessmentChart = new Chart(overallAssessmentChartCanvas, {
         type: 'pie',
         data: {
-            labels: ['Ada', 'Tidak Ada'],
+            labels: detailedChartLabels,
             datasets: [{
-                label: 'Status Dokumen Keseluruhan',
-                data: [overallChartData.complete, overallChartData.not_complete],
-                backgroundColor: [
-                    'rgba(40, 167, 69, 0.7)',
-                    'rgba(255, 193, 7, 0.7)'
-                ],
-                borderColor: [
-                    'rgba(40, 167, 69, 1)',
-                    'rgba(255, 193, 7, 1)'
-                ],
+                label: 'Status Dokumen per Tahap',
+                data: detailedChartValues,
+                backgroundColor: detailedChartColors,
+                borderColor: detailedChartColors.map(color => color.replace('0.7', '1')),
                 borderWidth: 1
             }]
         },
@@ -446,14 +487,23 @@
             plugins: {
                 title: {
                     display: true,
-                    text: 'Status Kelengkapan Dokumen Keseluruhan'
+                    text: 'Status Kelengkapan Dokumen - Detail per Tahap'
                 },
-                datalabels: {
-                    color: '#fff',
-                    formatter: (value, context) => {
-                        const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
-                        return value + ' (' + percentage + ')';
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            let label = context.label || '';
+                            if (label) label += ': ';
+                            if (context.parsed !== null) label += context.parsed + ' dokumen';
+                            return label;
+                        }
+                    }
+                },
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 20,
+                        padding: 15
                     }
                 }
             }

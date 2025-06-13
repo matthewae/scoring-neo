@@ -279,17 +279,21 @@
         </div>
     </div>
 
-    <div class="card mb-4">
-        <div class="card-header">Grafik Hasil Penilaian per Tahap</div>
-        <div class="card-body d-flex justify-content-center">
-            <div style="width: 50%;"><canvas id="assessmentChart"></canvas></div>
-        </div>
-    </div>
+
 
     <div class="card mb-4">
         <div class="card-header">Grafik Total Hasil Penilaian</div>
-        <div class="card-body d-flex justify-content-center">
-            <div style="width: 50%;"><canvas id="overallAssessmentChart"></canvas></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Grafik Total Hasil Penilaian</h5>
+                    <canvas id="overallAssessmentChart"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <h5>Grafik Hasil Penilaian per Tahap</h5>
+                    <canvas id="assessmentChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 

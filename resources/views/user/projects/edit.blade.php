@@ -4,7 +4,7 @@
 <div class="container">
     <h1>Edit Proyek: {{ $project->pekerjaan }}</h1>
 
-    <form action="{{ route('projects.update', $project->id) }}" method="POST">
+    <form action="{{ route('user.projects.update', $project->id) }}" method="POST">
         @csrf
         @method('PUT')
         <div class="form-group mb-3">
@@ -53,7 +53,7 @@
         <p>Form untuk mengubah keterangan dan nilai dokumen akan ditambahkan di sini.</p>
 
         <button type="submit" class="btn btn-success">Update Proyek</button>
-        <a href="{{ route('projects.show', $project->id) }}" class="btn btn-secondary">Batal</a>
+        <a href="{{ route('user.projects.show', $project->id) }}" class="btn btn-secondary">Batal</a>
     </form>
 </div>
 @endsection

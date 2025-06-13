@@ -159,12 +159,12 @@
             </form>
 
             <div class="container">
-    <h1>Detail Hasil Penilaian Proyek: {{ $project->name }}</h1>
+    <h1>Detail Hasil Penilaian Proyek: {{ $project->project_name }}</h1>
 
     <div class="card mb-4">
         <div class="card-header">Informasi Proyek</div>
         <div class="card-body">
-            <p><strong>Nama Proyek:</strong> {{ $project->name }}</p>
+            <p><strong>Nama Proyek:</strong> {{ $project->project_name }}</p>
             <p><strong>Pekerjaan:</strong> {{ $project->pekerjaan }}</p>
             <p><strong>Lokasi:</strong> {{ $project->lokasi }}</p>
             <p><strong>Konsultan Perencana:</strong> {{ $project->konsultan_perencana }}</p>
@@ -178,106 +178,107 @@
     </div>
 
     <div class="card mb-4">
-        <div class="card-header">Dokumen Proyek per Tahap</div>
-        <div class="card-body">
-            @if ($project->projectDocuments->isEmpty())
+    <div class="card-header">Dokumen Proyek per Tahap</div>
+    <div class="card-body">
+        @if ($project->projectDocuments->isEmpty())
+            <p>Tidak ada dokumen yang terkait dengan proyek ini.</p>
+        @else
+            @php
+                $documentsByStage = $project->projectDocuments->groupBy('document.document_stage_id');
+                $stages = \App\Models\DocumentStage::all()->sortBy('id');
+
+                $chartData = [];
+                $totalCompleteCount = 0;
+                $totalNotCompleteCount = 0;
+
+                foreach ($stages as $stage) {
+                    $completeCount = 0;
+                    $notCompleteCount = 0;
+                    if ($documentsByStage->has($stage->id)) {
+                        foreach ($documentsByStage[$stage->id] as $projectDocument) {
+                            if ($projectDocument->is_complete) {
+                                $completeCount++;
+                                $totalCompleteCount++;
+                            } else {
+                                $notCompleteCount++;
+                                $totalNotCompleteCount++;
+                            }
+                        }
+                    }
+                    $chartData[$stage->id] = [
+                        'complete' => $completeCount,
+                        'not_complete' => $notCompleteCount,
+                    ];
+                }
+
+                $overallChartData = [
+                    'complete' => $totalCompleteCount,
+                    'not_complete' => $totalNotCompleteCount,
+                ];
+            @endphp
+
+            @if($documentsByStage->isEmpty())
                 <p>Tidak ada dokumen yang terkait dengan proyek ini.</p>
             @else
-                @php
-                                    $documentsByStage = $project->projectDocuments->groupBy('document.document_stage_id');
-                                    $stages = \App\Models\DocumentStage::all()->sortBy('id'); // Assuming DocumentStage model exists and has an 'id' for sorting
-
-                                    $chartData = [];
-                                    $totalCompleteCount = 0;
-                                    $totalNotCompleteCount = 0;
-                                    foreach ($stages as $stage) {
-                                        $completeCount = 0;
-                                        $notCompleteCount = 0;
-                                        if ($documentsByStage->has($stage->id)) {
-                                            foreach ($documentsByStage[$stage->id] as $projectDocument) {
-                                                if ($projectDocument->is_complete) {
-                                                    $completeCount++;
-                                                    $totalCompleteCount++;
-                                                } else {
-                                                    $notCompleteCount++;
-                                                    $totalNotCompleteCount++;
-                                                }
-                                            }
-                                        }
-                                        $chartData[$stage->id] = [
-                                            'complete' => $completeCount,
-                                            'not_complete' => $notCompleteCount,
-                                        ];
-                                    }
-                                    $overallChartData = [
-                                        'complete' => $totalCompleteCount,
-                                        'not_complete' => $totalNotCompleteCount,
-                                    ];
-                                @endphp
-
-                                @if($documentsByStage->isEmpty())
-                                    <p>Tidak ada dokumen yang terkait dengan proyek ini.</p>
-                                @else
-                                    <div id="documentCarousel" class="carousel slide" data-bs-ride="carousel">
-                                        <div class="carousel-inner">
-                                            @foreach ($stages as $stage)
-                                                <div class="carousel-item {{ $loop->first ? 'active' : '' }}" data-stage-id="{{ $stage->id }}">
-                                                    <h5>Tahap: {{ $stage->name }}</h5>
-                                    @if ($documentsByStage->has($stage->id) && !$documentsByStage[$stage->id]->isEmpty())
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th>Nama Dokumen</th>
-                                                    <th>Status Persetujuan</th>
-                                                    <th>Catatan</th>
-                                                    <th>File</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($documentsByStage[$stage->id] as $projectDocument)
-                                                    <tr>
-                                                        <td>{{ $projectDocument->document->name }}</td>
-                                                        <td>
-                                                            <span class="badge 
-                                                                @if($projectDocument->is_complete) bg-success
-                                                                @else bg-warning text-dark
-                                                                @endif">
-                                                                @if($projectDocument->is_complete) Ada
-                                                                @else Tidak Ada
-                                                                @endif
-                                                            </span>
-                                                        </td>
-                                                        <td>{{ $projectDocument->notes ?? 'Tidak ada catatan' }}</td>
-                                                        <td>
-                                                            @if ($projectDocument->file_path)
-                                                                <a href="{{ Storage::url($projectDocument->file_path) }}" target="_blank" class="btn btn-info btn-sm">Lihat File</a>
-                                                            @else
-                                                                Tidak ada file
-                                                            @endif
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    @else
-                                        <p>Tidak ada dokumen untuk tahap ini.</p>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#documentCarousel" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
+                {{-- Navigasi --}}
+                <div class="d-flex justify-content-center mb-3">
+                    <button class="btn btn-outline-secondary me-2" onclick="prevStage()">←</button>
+                    @foreach ($stages as $stage)
+                        <button class="btn btn-outline-primary stage-dot me-1" data-stage-id="{{ $stage->id }}" onclick="showStage({{ $stage->id }})">
+                            {{ $loop->iteration }}
                         </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#documentCarousel" data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
-                        </button>
+                    @endforeach
+                    <button class="btn btn-outline-secondary ms-2" onclick="nextStage()">→</button>
+                </div>
+
+                {{-- Konten Per Tahap --}}
+                @foreach ($stages as $stage)
+                    <div id="stage-{{ $stage->id }}" class="stage-content" style="display: none;">
+                        <h5 class="mb-3">Tahap: {{ $stage->name }}</h5>
+
+                        @if ($documentsByStage->has($stage->id) && !$documentsByStage[$stage->id]->isEmpty())
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Nama Dokumen</th>
+                                        <th>Status Persetujuan</th>
+                                        <th>Catatan</th>
+                                        <th>File</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($documentsByStage[$stage->id] as $projectDocument)
+                                        <tr>
+                                            <td>{{ $projectDocument->document->name }}</td>
+                                            <td>
+                                                <span class="badge 
+                                                    @if($projectDocument->is_complete) bg-success
+                                                    @else bg-warning text-dark
+                                                    @endif">
+                                                    {{ $projectDocument->is_complete ? 'Ada' : 'Tidak Ada' }}
+                                                </span>
+                                            </td>
+                                            <td>{{ $projectDocument->notes ?? 'Tidak ada catatan' }}</td>
+                                            <td>
+                                                @if ($projectDocument->file_path)
+                                                    <a href="{{ Storage::url($projectDocument->file_path) }}" target="_blank" class="btn btn-info btn-sm">Lihat File</a>
+                                                @else
+                                                    Tidak ada file
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <p>Tidak ada dokumen untuk tahap ini.</p>
+                        @endif
                     </div>
-                @endif
+                @endforeach
             @endif
-        </div>
+        @endif
     </div>
+</div>
 
 
 
@@ -308,134 +309,157 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <!-- Custom JavaScript for sidebar toggle and chart -->
     <script>
-        var sidebarToggle = document.getElementById('sidebarToggle');
-        if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', function() {
-                document.getElementById('wrapper').classList.toggle('toggled');
-            });
-        }
+    // Toggle sidebar
+    var sidebarToggle = document.getElementById('sidebarToggle');
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function () {
+            document.getElementById('wrapper').classList.toggle('toggled');
+        });
+    }
 
-        const allStageData = @json($chartData);
+    // Data dari Laravel
+    const allStageData = @json($chartData);
+    const overallChartData = @json($overallChartData);
 
-        const overallChartData = @json($overallChartData);
-
-        const assessmentChartCanvas = document.getElementById('assessmentChart');
-        const assessmentChart = new Chart(assessmentChartCanvas, {
-            type: 'pie',
-            data: {
-                labels: ['Ada', 'Tidak Ada'],
-                datasets: [{
-                    label: 'Status Dokumen',
-                    data: [0, 0], // Initial data, will be updated by updateChartData
-                    backgroundColor: [
-                        'rgba(40, 167, 69, 0.7)',  // Green for Ada
-                        'rgba(255, 193, 7, 0.7)'    // Yellow for Tidak Ada
-                    ],
-                    borderColor: [
-                        'rgba(40, 167, 69, 1)',
-                        'rgba(255, 193, 7, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Status Kelengkapan Dokumen'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed !== null) {
-                                    label += context.parsed + ' dokumen';
-                                }
-                                return label;
-                            }
-                        }
+    // Stage IDs untuk navigasi
+    // Ambil semua ID tahap dari PHP
+    const stageIds = @json($stages->pluck('id')->toArray());
+    
+    let currentStageIndex = 0;
+    
+    // Inisialisasi Chart.js - Per Stage
+    const assessmentChartCanvas = document.getElementById('assessmentChart');
+    const assessmentChart = new Chart(assessmentChartCanvas, {
+        type: 'pie',
+        data: {
+            labels: ['Ada', 'Tidak Ada'],
+            datasets: [{
+                label: 'Status Dokumen',
+                data: [0, 0],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.7)',  // Hijau - Ada
+                    'rgba(255, 193, 7, 0.7)'   // Kuning - Tidak Ada
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(255, 193, 7, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Status Kelengkapan Dokumen'
+                },
+                datalabels: {
+                    color: '#fff',
+                    formatter: (value, context) => {
+                        const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
+                        return value + ' (' + percentage + ')';
                     }
                 }
             }
-        });
+        }
+    });
 
-        function updateChartData(stageId) {
-            const dataForStage = allStageData[stageId];
-            if (dataForStage) {
-                assessmentChart.data.datasets[0].data = [dataForStage.complete, dataForStage.not_complete];
-                assessmentChart.update();
-            }
+    // Fungsi update chart sesuai tahap
+    function updateChartData(stageId) {
+        const dataForStage = allStageData[stageId];
+        if (dataForStage) {
+            assessmentChart.data.datasets[0].data = [dataForStage.complete, dataForStage.not_complete];
+        } else {
+            // If no data for the stage, assume 0 complete and 0 not complete documents
+            assessmentChart.data.datasets[0].data = [0, 0];
+        }
+        assessmentChart.update();
+    }
+
+    // Fungsi tampilkan tahap
+    function showStage(stageId) {
+        // Sembunyikan semua
+        document.querySelectorAll('.stage-content').forEach(div => div.style.display = 'none');
+        document.getElementById('stage-' + stageId).style.display = '';
+
+        // Update tombol active
+        document.querySelectorAll('.stage-dot').forEach(dot => {
+            dot.classList.remove('btn-primary');
+            dot.classList.add('btn-outline-primary');
+        });
+        const activeDot = document.querySelector('.stage-dot[data-stage-id="' + stageId + '"]');
+        if (activeDot) {
+            activeDot.classList.add('btn-primary');
+            activeDot.classList.remove('btn-outline-primary');
         }
 
-        // Initial chart update for the active carousel item
-        const initialActiveItem = document.querySelector('#documentCarousel .carousel-item.active');
-        if (initialActiveItem) {
-            const stageId = initialActiveItem.dataset.stageId;
-            if (stageId) {
-                updateChartData(stageId);
-            }
+        // Update index dan chart
+        currentStageIndex = stageIds.indexOf(stageId);
+        updateChartData(stageId);
+    }
+
+    // Fungsi panah navigasi
+    function prevStage() {
+        if (currentStageIndex > 0) {
+            showStage(stageIds[currentStageIndex - 1]);
         }
+    }
 
-        // Update chart when carousel slides
-        const documentCarousel = document.getElementById('documentCarousel');
-        documentCarousel.addEventListener('slid.bs.carousel', function (event) {
-            const activeItem = event.relatedTarget;
-            const stageId = activeItem.dataset.stageId;
-            if (stageId) {
-                updateChartData(stageId);
-            }
-        });
+    function nextStage() {
+        if (currentStageIndex < stageIds.length - 1) {
+            showStage(stageIds[currentStageIndex + 1]);
+        }
+    }
 
-        // Overall Assessment Chart
-        const overallAssessmentChartCanvas = document.getElementById('overallAssessmentChart');
-        const overallAssessmentChart = new Chart(overallAssessmentChartCanvas, {
-            type: 'pie',
-            data: {
-                labels: ['Ada', 'Tidak Ada'],
-                datasets: [{
-                    label: 'Status Dokumen Keseluruhan',
-                    data: [overallChartData.complete, overallChartData.not_complete],
-                    backgroundColor: [
-                        'rgba(40, 167, 69, 0.7)',  // Green for Ada
-                        'rgba(255, 193, 7, 0.7)'    // Yellow for Tidak Ada
-                    ],
-                    borderColor: [
-                        'rgba(40, 167, 69, 1)',
-                        'rgba(255, 193, 7, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Status Kelengkapan Dokumen Keseluruhan'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed !== null) {
-                                    label += context.parsed + ' dokumen';
-                                }
-                                return label;
-                            }
-                        }
+    // Inisialisasi awal
+    if (stageIds.length > 0) {
+        showStage(stageIds[0]); // Tampilkan tahap pertama
+    }
+
+    // Pie Chart - Keseluruhan
+    const overallAssessmentChartCanvas = document.getElementById('overallAssessmentChart');
+    const overallAssessmentChart = new Chart(overallAssessmentChartCanvas, {
+        type: 'pie',
+        data: {
+            labels: ['Ada', 'Tidak Ada'],
+            datasets: [{
+                label: 'Status Dokumen Keseluruhan',
+                data: [overallChartData.complete, overallChartData.not_complete],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.7)',
+                    'rgba(255, 193, 7, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(255, 193, 7, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Status Kelengkapan Dokumen Keseluruhan'
+                },
+                datalabels: {
+                    color: '#fff',
+                    formatter: (value, context) => {
+                        const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
+                        return value + ' (' + percentage + ')';
                     }
                 }
             }
-        });
-    </script>
+        }
+    });
+</script>
+
 </body>
 </html>

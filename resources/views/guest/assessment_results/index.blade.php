@@ -187,9 +187,11 @@
                                                 <td>{{ $project->projectDocuments->count() }}</td>
                                                 <td>
                                                     @php
-                                                        $assessedDocumentsCount = $project->projectDocuments->whereIn('guest_approval_status', ['approved', 'rejected'])->count();
+                                                        $submittedDocumentsCount = $project->projectDocuments->filter(function ($doc) {
+                                                            return !is_null($doc->guest_uploaded_file_path) || !is_null($doc->guest_notes);
+                                                        })->count();
                                                     @endphp
-                                                    {{ $assessedDocumentsCount }} dari {{ $project->projectDocuments->count() }}
+                                                    {{ $submittedDocumentsCount }} / {{ $project->projectDocuments->count() }}
                                                 </td>
                                                 <td>
                                                     <a href="{{ route('guest.assessment_results.show', $project->id) }}" class="btn btn-success btn-sm">Lihat Detail</a>

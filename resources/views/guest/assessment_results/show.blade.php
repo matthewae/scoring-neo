@@ -291,11 +291,12 @@
                     <canvas id="overallAssessmentChart"></canvas>
                 </div>
                 <div class="col-md-6">
-                    <h5>Grafik Hasil Penilaian per Tahap</h5>
-                    <canvas id="assessmentChart"></canvas>
-                </div>
-            </div>
-        </div>
+                    <h5 class="card-title text-center">Per Tahap</h5>
+                                <div style="width: 400px; margin: auto;">
+                                    <canvas id="assessmentChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
     </div>
 
     <a href="{{ route('guest.assessment_results.index') }}" class="btn btn-secondary">Kembali ke Daftar Hasil Penilaian</a>
@@ -394,15 +395,20 @@
                     'rgba(40, 167, 69, 1)',
                     'rgba(255, 193, 7, 1)'
                 ],
-                borderWidth: 1
+                borderWidth: 1,
+                borderRadius: 5 // Add border radius
             }]
         },
         options: {
             responsive: true,
+            aspectRatio: 1, // Make the chart square
             plugins: {
                 title: {
                     display: true,
-                    text: 'Status Kelengkapan Dokumen'
+                    text: 'Status Kelengkapan Dokumen',
+                    font: {
+                        size: 16
+                    }
                 },
                 datalabels: {
                     color: '#fff',
@@ -411,6 +417,9 @@
                         const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
                         return value + ' (' + percentage + ')';
                     }
+                },
+                legend: {
+                    position: 'bottom'
                 }
             }
         }
@@ -479,32 +488,31 @@
                 data: detailedChartValues,
                 backgroundColor: detailedChartColors,
                 borderColor: detailedChartColors.map(color => color.replace('0.7', '1')),
-                borderWidth: 1
+                borderWidth: 1,
+                borderRadius: 5 // Add border radius
             }]
         },
         options: {
             responsive: true,
+            aspectRatio: 1, // Make the chart square
             plugins: {
                 title: {
                     display: true,
-                    text: 'Status Kelengkapan Dokumen - Detail per Tahap'
+                    text: 'Status Kelengkapan Dokumen Keseluruhan',
+                    font: {
+                        size: 16
+                    }
                 },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            let label = context.label || '';
-                            if (label) label += ': ';
-                            if (context.parsed !== null) label += context.parsed + ' dokumen';
-                            return label;
-                        }
+                datalabels: {
+                    color: '#fff',
+                    formatter: (value, context) => {
+                        const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
+                        return value + ' (' + percentage + ')';
                     }
                 },
                 legend: {
-                    position: 'right',
-                    labels: {
-                        boxWidth: 20,
-                        padding: 15
-                    }
+                    position: 'bottom'
                 }
             }
         }

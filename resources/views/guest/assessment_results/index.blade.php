@@ -188,7 +188,7 @@
                                                 <td>
                                                     @php
                                                         $submittedDocumentsCount = $project->projectDocuments->filter(function ($doc) {
-                                                            return !is_null($doc->guest_uploaded_file_path) || !is_null($doc->guest_notes);
+                                                            return $doc->is_complete;
                                                         })->count();
                                                     @endphp
                                                     {{ $submittedDocumentsCount }} / {{ $project->projectDocuments->count() }}

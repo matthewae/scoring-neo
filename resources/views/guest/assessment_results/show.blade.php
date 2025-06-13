@@ -184,18 +184,45 @@
                 <p>Tidak ada dokumen yang terkait dengan proyek ini.</p>
             @else
                 @php
-                    $documentsByStage = $project->projectDocuments->groupBy('document.document_stage_id');
-                    $stages = \App\Models\DocumentStage::all()->sortBy('id'); // Assuming DocumentStage model exists and has an 'id' for sorting
-                @endphp
+                                    $documentsByStage = $project->projectDocuments->groupBy('document.document_stage_id');
+                                    $stages = \App\Models\DocumentStage::all()->sortBy('id'); // Assuming DocumentStage model exists and has an 'id' for sorting
 
-                @if($documentsByStage->isEmpty())
-                    <p>Tidak ada dokumen yang terkait dengan proyek ini.</p>
-                @else
-                    <div id="documentCarousel" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-inner">
-                            @foreach ($stages as $stage)
-                                <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                                    <h5>Tahap: {{ $stage->name }}</h5>
+                                    $chartData = [];
+                                    $totalCompleteCount = 0;
+                                    $totalNotCompleteCount = 0;
+                                    foreach ($stages as $stage) {
+                                        $completeCount = 0;
+                                        $notCompleteCount = 0;
+                                        if ($documentsByStage->has($stage->id)) {
+                                            foreach ($documentsByStage[$stage->id] as $projectDocument) {
+                                                if ($projectDocument->is_complete) {
+                                                    $completeCount++;
+                                                    $totalCompleteCount++;
+                                                } else {
+                                                    $notCompleteCount++;
+                                                    $totalNotCompleteCount++;
+                                                }
+                                            }
+                                        }
+                                        $chartData[$stage->id] = [
+                                            'complete' => $completeCount,
+                                            'not_complete' => $notCompleteCount,
+                                        ];
+                                    }
+                                    $overallChartData = [
+                                        'complete' => $totalCompleteCount,
+                                        'not_complete' => $totalNotCompleteCount,
+                                    ];
+                                @endphp
+
+                                @if($documentsByStage->isEmpty())
+                                    <p>Tidak ada dokumen yang terkait dengan proyek ini.</p>
+                                @else
+                                    <div id="documentCarousel" class="carousel slide" data-bs-ride="carousel">
+                                        <div class="carousel-inner">
+                                            @foreach ($stages as $stage)
+                                                <div class="carousel-item {{ $loop->first ? 'active' : '' }}" data-stage-id="{{ $stage->id }}">
+                                                    <h5>Tahap: {{ $stage->name }}</h5>
                                     @if ($documentsByStage->has($stage->id) && !$documentsByStage[$stage->id]->isEmpty())
                                         <table class="table table-bordered">
                                             <thead>
@@ -212,14 +239,15 @@
                                                         <td>{{ $projectDocument->document->name }}</td>
                                                         <td>
                                                             <span class="badge 
-                                                                @if($projectDocument->guest_approval_status == 'approved') bg-success
-                                                                @elseif($projectDocument->guest_approval_status == 'rejected') bg-danger
+                                                                @if($projectDocument->is_complete) bg-success
                                                                 @else bg-warning text-dark
                                                                 @endif">
-                                                                {{ ucfirst($projectDocument->guest_approval_status) }}
+                                                                @if($projectDocument->is_complete) Ada
+                                                                @else Tidak Ada
+                                                                @endif
                                                             </span>
                                                         </td>
-                                                        <td>{{ $projectDocument->guest_notes ?? 'Tidak ada catatan' }}</td>
+                                                        <td>{{ $projectDocument->notes ?? 'Tidak ada catatan' }}</td>
                                                         <td>
                                                             @if ($projectDocument->file_path)
                                                                 <a href="{{ Storage::url($projectDocument->file_path) }}" target="_blank" class="btn btn-info btn-sm">Lihat File</a>
@@ -252,9 +280,16 @@
     </div>
 
     <div class="card mb-4">
-        <div class="card-header">Grafik Hasil Penilaian</div>
+        <div class="card-header">Grafik Hasil Penilaian per Tahap</div>
         <div class="card-body d-flex justify-content-center">
-            <div style="width: 70%;"><canvas id="assessmentChart"></canvas></div>
+            <div style="width: 50%;"><canvas id="assessmentChart"></canvas></div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">Grafik Total Hasil Penilaian</div>
+        <div class="card-body d-flex justify-content-center">
+            <div style="width: 50%;"><canvas id="overallAssessmentChart"></canvas></div>
         </div>
     </div>
 
@@ -278,23 +313,24 @@
             });
         }
 
-        // Chart.js for Document Completeness (Dummy Data)
+        const allStageData = @json($chartData);
+
+        const overallChartData = @json($overallChartData);
+
         const assessmentChartCanvas = document.getElementById('assessmentChart');
         const assessmentChart = new Chart(assessmentChartCanvas, {
             type: 'pie',
             data: {
-                labels: ['Disetujui', 'Ditolak', 'Menunggu'],
+                labels: ['Ada', 'Tidak Ada'],
                 datasets: [{
                     label: 'Status Dokumen',
-                    data: [0, 0, 0], // Initial dummy data
+                    data: [0, 0], // Initial data, will be updated by updateChartData
                     backgroundColor: [
-                        'rgba(40, 167, 69, 0.7)', // Green for Approved
-                        'rgba(220, 53, 69, 0.7)',  // Red for Rejected
-                        'rgba(255, 193, 7, 0.7)'   // Yellow for Pending
+                        'rgba(40, 167, 69, 0.7)',  // Green for Ada
+                        'rgba(255, 193, 7, 0.7)'    // Yellow for Tidak Ada
                     ],
                     borderColor: [
                         'rgba(40, 167, 69, 1)',
-                        'rgba(220, 53, 69, 1)',
                         'rgba(255, 193, 7, 1)'
                     ],
                     borderWidth: 1
@@ -326,46 +362,19 @@
         });
 
         function updateChartData(stageId) {
-            // Dummy data for demonstration based on stageId
-            let approved = 0;
-            let rejected = 0;
-            let pending = 0;
-
-            if (stageId === 1) { // Example for stage 1
-                approved = 7;
-                rejected = 1;
-                pending = 2;
-            } else if (stageId === 2) { // Example for stage 2
-                approved = 3;
-                rejected = 0;
-                pending = 5;
-            } else if (stageId === 3) { // Example for stage 3
-                approved = 5;
-                rejected = 2;
-                pending = 3;
-            } else { // Default or other stages
-                approved = 5;
-                rejected = 2;
-                pending = 3;
+            const dataForStage = allStageData[stageId];
+            if (dataForStage) {
+                assessmentChart.data.datasets[0].data = [dataForStage.complete, dataForStage.not_complete];
+                assessmentChart.update();
             }
-
-            assessmentChart.data.datasets[0].data = [approved, rejected, pending];
-            assessmentChart.update();
         }
 
         // Initial chart update for the active carousel item
         const initialActiveItem = document.querySelector('#documentCarousel .carousel-item.active');
         if (initialActiveItem) {
-            const stageId = initialActiveItem.querySelector('h5').textContent.match(/Tahap: (\w+)/);
-            if (stageId && stageId[1]) {
-                // Map stage name to a numeric ID for dummy data purposes
-                // In a real application, you would pass the actual stage ID from the backend
-                let numericStageId = 0;
-                if (stageId[1] === 'Pre-Tender') numericStageId = 1;
-                else if (stageId[1] === 'Tender') numericStageId = 2;
-                else if (stageId[1] === 'Pelaksanaan') numericStageId = 3;
-                
-                updateChartData(numericStageId);
+            const stageId = initialActiveItem.dataset.stageId;
+            if (stageId) {
+                updateChartData(stageId);
             }
         }
 
@@ -373,14 +382,54 @@
         const documentCarousel = document.getElementById('documentCarousel');
         documentCarousel.addEventListener('slid.bs.carousel', function (event) {
             const activeItem = event.relatedTarget;
-            const stageName = activeItem.querySelector('h5').textContent.match(/Tahap: (\w+)/);
-            if (stageName && stageName[1]) {
-                let numericStageId = 0;
-                if (stageName[1] === 'Pre-Tender') numericStageId = 1;
-                else if (stageName[1] === 'Tender') numericStageId = 2;
-                else if (stageName[1] === 'Pelaksanaan') numericStageId = 3;
+            const stageId = activeItem.dataset.stageId;
+            if (stageId) {
+                updateChartData(stageId);
+            }
+        });
 
-                updateChartData(numericStageId);
+        // Overall Assessment Chart
+        const overallAssessmentChartCanvas = document.getElementById('overallAssessmentChart');
+        const overallAssessmentChart = new Chart(overallAssessmentChartCanvas, {
+            type: 'pie',
+            data: {
+                labels: ['Ada', 'Tidak Ada'],
+                datasets: [{
+                    label: 'Status Dokumen Keseluruhan',
+                    data: [overallChartData.complete, overallChartData.not_complete],
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.7)',  // Green for Ada
+                        'rgba(255, 193, 7, 0.7)'    // Yellow for Tidak Ada
+                    ],
+                    borderColor: [
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(255, 193, 7, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Status Kelengkapan Dokumen Keseluruhan'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed + ' dokumen';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
             }
         });
     </script>

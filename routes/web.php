@@ -74,7 +74,7 @@ Route::middleware(['auth', 'user'])->group(function () {
         Route::get('/{project}/edit', [ProjectController::class, 'edit'])->name('edit');
         Route::put('/{project}', [ProjectController::class, 'update'])->name('update');
         Route::get('/{project}/assess', [ProjectController::class, 'assess'])->name('assess');
-        Route::post('/{project}/assess', [ProjectController::class, 'saveAssessment'])->name('saveAssessment');
+        Route::put('/{project}/assess', [ProjectController::class, 'saveAssessment'])->name('saveAssessment');
     });
 });
 

@@ -266,8 +266,8 @@
                                     <thead>
                                         <tr>
                                             <th>Nama Dokumen</th>
-                                            <th>Status Persetujuan</th>
-                                            <th>Catatan</th>
+                                            <th>Status</th>
+                                            <th style="width: 30%;">Catatan</th>
                                             <th>File</th>
                                         </tr>
                                     </thead>

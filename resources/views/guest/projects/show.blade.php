@@ -110,6 +110,7 @@
     <div class="container">
         <h1>Detail Proyek: {{ $project->project_name }}</h1>
         <p><strong>Deskripsi:</strong> {{ $project->project_description }}</p>
+        <p><strong>Skor Rata-rata:</strong> {{ number_format($project->average_score, 2) }}</p>
 
         <h2>Dokumen Proyek</h2>
         @if($documentsByStage->isEmpty())
@@ -138,7 +139,7 @@
                                     <tr>
                                         <td>{{ $document->name }}</td>
                                         <td>{{ $document->description }}</td>
-                                        <td>{{ $document->pivot->is_complete ? 'Lengkap' : 'Belum Lengkap' }}</td>
+                                        <td>{{ $document->is_complete ? 'Lengkap' : 'Belum Lengkap' }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

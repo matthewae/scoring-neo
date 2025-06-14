@@ -62,6 +62,8 @@ Route::middleware(['auth', 'user'])->group(function () {
     });
 
     Route::get('/user/documents', [UserController::class, 'documentsIndex'])->name('user.documents.index');
+    Route::get('/user/submission-history', [UserController::class, 'submissionHistoryIndex'])->name('user.submission_history.index');
+    Route::get('/user/guide', [UserController::class, 'guide'])->name('user.guide');
     Route::get('/user/projects/sync-documents', [ProjectController::class, 'syncProjectDocuments'])->name('user.projects.syncDocuments');
     Route::get('/user/projects/{project}/documents', [UserController::class, 'getProjectDocuments'])->name('user.projects.getDocuments');
 

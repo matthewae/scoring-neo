@@ -15,7 +15,56 @@
             background-color: #ffffff;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+        .table th,
+        .table td {
+            vertical-align: middle;
+        }
+        .table thead th {
+            background-color: #f2f2f2;
+            color: #333;
+            font-weight: bold;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #4e555b;
+            transform: translateY(-2px);
+        }
+        .alert {
+            margin-top: 20px;
+        }
+        .form-control {
+            border-radius: 5px;
+        }
+        .form-check-input {
+            margin-top: 0.3em;
+        }
+        .form-check-label {
+            margin-bottom: 0;
         }
         h1 {
             margin-bottom: 30px;
@@ -78,6 +127,31 @@
     <div class="container">
         <h1>Ajukan Pengajuan Dokumen untuk Proyek: {{ $project->name }}</h1>
 
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         <form action="{{ route('guest.projects.saveAssessment', $project->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
 
@@ -108,15 +182,23 @@
                                                 <tr>
                                                     <td>{{ $document->name }}</td>
                                                     <td>
-                                                        <div class="form-group mb-0">
-                                                            <input type="file" name="documents[{{ $document->id }}][file]" id="document_file_{{ $document->id }}" class="form-control">
-                                                        </div>
+                                                        @if($document->pivot->is_complete)
+                                                            Sudah Dinilai
+                                                        @else
+                                                            <div class="form-group mb-0">
+                                                                <input type="file" name="documents[{{ $document->id }}][file]" id="document_file_{{ $document->id }}" class="form-control">
+                                                            </div>
+                                                        @endif
                                                     </td>
                                                     <td>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" name="documents[{{ $document->id }}][selected]" value="1" id="document_selected_{{ $document->id }}">
-                                                            <label class="form-check-label" for="document_selected_{{ $document->id }}">Ajukan</label>
-                                                        </div>
+                                                        @if($document->pivot->is_complete)
+                                                            Sudah Dinilai
+                                                        @else
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="documents[{{ $document->id }}][selected]" value="1" id="document_selected_{{ $document->id }}">
+                                                                <label class="form-check-label" for="document_selected_{{ $document->id }}">Ajukan</label>
+                                                            </div>
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @empty
@@ -133,7 +215,19 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary mt-4">Kirim Pengajuan</button>
+            @php
+                $allDocumentsComplete = true;
+                foreach ($documentsGroupedByStage as $stageDocuments) {
+                    foreach ($stageDocuments as $document) {
+                        if (!$document->is_complete) {
+                            $allDocumentsComplete = false;
+                            break 2; // Break out of both loops
+                        }
+                    }
+                }
+            @endphp
+
+            <button type="submit" class="btn btn-primary mt-4" {{ $allDocumentsComplete ? 'disabled' : '' }}>Kirim Pengajuan</button>
             <a href="{{ route('guest.projects.show', $project->id) }}" class="btn btn-secondary mt-4">Batal</a>
         </form>
     </div>

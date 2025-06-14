@@ -31,7 +31,7 @@ class GuestController extends Controller
     public function showProject(Project $project)
     {
         $project->load(['documents' => function ($query) {
-            $query->with('documentStage')->withPivot('value')->orderBy('document_stage_id');
+            $query->with('documentStage')->withPivot('value', 'is_complete', 'guest_approval_status')->orderBy('document_stage_id');
         }]);
 
         $documentsByStage = $project->documents->groupBy('documentStage.name');
@@ -42,7 +42,7 @@ class GuestController extends Controller
     public function assess(Project $project)
     {
         $project->load(['documents' => function ($query) {
-            $query->with('documentStage')->withPivot('value')->orderBy('document_stage_id');
+            $query->with('documentStage')->withPivot('value', 'is_complete', 'guest_approval_status')->orderBy('document_stage_id');
         }]);
 
         $documentsGroupedByStage = $project->documents->groupBy('document_stage_id');
@@ -63,7 +63,7 @@ class GuestController extends Controller
     {
         $request->validate([
             'documents.*.selected' => 'nullable|boolean',
-            'documents.*.file' => 'nullable|file|mimes:pdf,doc,docx,zip|max:2048',
+            'documents.*.file' => 'nullable|file|mimes:pdf,doc,docx,zip|max:1048576',
         ]);
 
         \Log::info('saveAssessment method called for project: ' . $project->id);

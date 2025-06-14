@@ -127,7 +127,10 @@ class UserController extends Controller
 
     public function approveGuestProposal(ProjectDocument $document)
     {
-        $document->update(['guest_approval_status' => true]);
+        $document->update([
+            'guest_approval_status' => true,
+            'is_complete' => true
+        ]);
         return redirect()->back()->with('success', 'Guest proposal approved successfully.');
     }
 

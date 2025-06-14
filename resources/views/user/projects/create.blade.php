@@ -325,7 +325,7 @@
                     </a>
                 </li>
                 <li class="active">
-                    <a href="{{ route('projects.index') }}">
+                    <a href="{{ route('user.projects.index') }}">
                         <i class="fas fa-project-diagram"></i>
                         Project
                     </a>
@@ -366,12 +366,12 @@
                 <div class="card">
                     <div class="header-row">
                         <div class="card-title">Buat Proyek Baru</div>
-                        <a href="{{ route('projects.index') }}" class="btn-back"><i class="fas fa-arrow-left"></i> Kembali</a>
+                        <a href="{{ route('user.projects.index') }}" class="btn-back"><i class="fas fa-arrow-left"></i> Kembali</a>
                     </div>
 
 
 
-                    <form action="{{ route('projects.store') }}" method="POST">
+                    <form action="{{ route('user.projects.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-6 slide glass-effect rounded-xl p-6" id="slide-0">
                             <div class="form-group">
@@ -467,8 +467,8 @@
                                                         </select>
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        <input type="file" name="documents[{{ $document->id }}][file]" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" accept=".pdf,.jpg,.jpeg,.png">
-                                                        <input type="text" name="documents[{{ $document->id }}][notes]" placeholder="Catatan" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                                        <input type="file" name="document_files[{{ $document->id }}]" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" accept=".pdf,.jpg,.jpeg,.png">
+                                                    <input type="text" name="documents[{{ $document->id }}][notes]" placeholder="Catatan" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                                     </td>
                                                 </tr>
                                             @endforeach

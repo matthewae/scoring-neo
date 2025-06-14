@@ -16,8 +16,14 @@ class IsUser
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && Auth::user()->role === 'user') {
+        if (Auth::check()) {
+            \Illuminate\Support\Facades\Log::info('User is authenticated. User role: ' . Auth::user()->role);
+            if (Auth::user()->role === 'user') {
             return $next($request);
+        }
+
+        } else {
+            \Illuminate\Support\Facades\Log::warning('User is authenticated but does not have the \'user\' role.');
         }
 
         abort(403, 'Unauthorized action.');

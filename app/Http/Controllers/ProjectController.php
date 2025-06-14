@@ -39,12 +39,34 @@ class ProjectController extends Controller
             'jangka_waktu' => 'required|integer',
         ]);
 
-        $project = Project::create(array_merge($request->all(), ['user_id' => auth()->id()]));
+        $project = Project::create(array_merge($request->except(['documents', 'document_files']), ['user_id' => auth()->id()]));
 
-        // Initialize project_documents pivot table with all 428 documents
-        $documents = Document::all();
-        foreach ($documents as $document) {
-            $project->documents()->attach($document->id, ['is_complete' => false, 'notes' => '']);
+        // Process document assessment values and file uploads
+        if ($request->has('documents')) {
+            foreach ($request->input('documents') as $document_id => $data) {
+                $is_complete = isset($data['is_complete']) && $data['is_complete'] == '1';
+                $notes = $data['notes'] ?? '';
+                $file_path = null;
+
+                if ($request->hasFile('document_files.' . $document_id)) {
+                    $file = $request->file('document_files.' . $document_id);
+                    $fileName = time() . '_' . $file->getClientOriginalName();
+                    $file->storeAs('public/documents', $fileName);
+                    $file_path = 'documents/' . $fileName;
+                }
+
+                $project->documents()->attach($document_id, [
+                    'is_complete' => $is_complete,
+                    'notes' => $notes,
+                    'file_path' => $file_path,
+                ]);
+            }
+        } else {
+            // If no documents are submitted, initialize all documents as incomplete
+            $documents = Document::all();
+            foreach ($documents as $document) {
+                $project->documents()->attach($document->id, ['is_complete' => false, 'notes' => '']);
+            }
         }
 
         return redirect()->route('user.projects.index')->with('success', 'Proyek berhasil dibuat!');
